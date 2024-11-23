@@ -1,42 +1,49 @@
-// src/pages/SetupPage.tsx
+// src/pages/SetupPage.jsx
 import { useState, useEffect } from 'react';
 import { Eye } from 'lucide-react';
 import { FilmGrain } from '../components/FilmGrain';
 
-// Define calibration points
-const CALIBRATION_POINTS = [
-  { x: '50%', y: '50%', label: 'Center' },
+// Define calibration sequence
+const CALIBRATION_SEQUENCE = [
   { x: '10%', y: '10%', label: 'Top Left' },
+  { x: '90%', y: '90%', label: 'Bottom Right' },
   { x: '90%', y: '10%', label: 'Top Right' },
   { x: '10%', y: '90%', label: 'Bottom Left' },
-  { x: '90%', y: '90%', label: 'Bottom Right' },
   { x: '50%', y: '10%', label: 'Top Center' },
   { x: '50%', y: '90%', label: 'Bottom Center' },
   { x: '10%', y: '50%', label: 'Middle Left' },
-  { x: '90%', y: '50%', label: 'Middle Right' }
+  { x: '90%', y: '50%', label: 'Middle Right' },
+  { x: '50%', y: '50%', label: 'Center' },
 ];
 
 export const SetupPage = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [webgazerInitialized, setWebgazerInitialized] = useState(false);
-  const [calibrationPoints, setCalibrationPoints] = useState(0);
+  const [currentPoint, setCurrentPoint] = useState(0);
   const [showFeedback, setShowFeedback] = useState(false);
 
   useEffect(() => {
-    // Initialize webgazer
     const initWebGazer = async () => {
       try {
-        await (window ).webgazer
+        await window.webgazer
           .setRegression('ridge')
           .setTracker('TFFacemesh')
           .begin();
         
-        // Hide video by default
-        (window ).webgazer.showVideo(false);
-        // Show face overlay for debugging
-        (window ).webgazer.showFaceOverlay(true);
-        // Show predictions
-        (window ).webgazer.showPredictionPoints(true);
+        window.webgazer.showVideo(true);
+        window.webgazer.showFaceOverlay(true);
+        window.webgazer.showPredictionPoints(true);
+
+        // Position the camera preview
+        const videoElement = document.getElementById('webgazerVideoContainer');
+        if (videoElement) {
+          videoElement.style.position = 'absolute';
+          videoElement.style.top = '30%';
+          videoElement.style.left = '50%';
+          videoElement.style.transform = 'translate(-50%, -50%)';
+          videoElement.style.zIndex = '1000';
+          videoElement.style.backgroundColor = 'transparent';
+        }
 
         setWebgazerInitialized(true);
       } catch (error) {
@@ -50,22 +57,32 @@ export const SetupPage = () => {
 
     return () => {
       if (webgazerInitialized) {
-        (window).webgazer.end();
+        window.webgazer.end();
       }
     };
   }, [currentStep, webgazerInitialized]);
 
   const handleCalibrationClick = (e) => {
-    // Get click coordinates
-    const x = e.clientX;
-    const y = e.clientY;
+    if (!webgazerInitialized || e.target.className.includes('not-calibration-point')) return;
 
-    // Add click data to webgazer
-    if (webgazerInitialized) {
-      (window ).webgazer.recordScreenPosition(x, y, 'click');
-      setCalibrationPoints(prev => prev + 1);
+    const clickedPoint = {
+      x: (e.clientX / window.innerWidth) * 100,
+      y: (e.clientY / window.innerHeight) * 100
+    };
+
+    const targetPoint = CALIBRATION_SEQUENCE[currentPoint];
+    const targetX = parseInt(targetPoint.x);
+    const targetY = parseInt(targetPoint.y);
+
+    // Check if click is close to the current target point
+    if (Math.abs(clickedPoint.x - targetX) < 5 && Math.abs(clickedPoint.y - targetY) < 5) {
+      window.webgazer.recordScreenPosition(e.clientX, e.clientY, 'click');
       setShowFeedback(true);
       setTimeout(() => setShowFeedback(false), 500);
+      
+      if (currentPoint < CALIBRATION_SEQUENCE.length - 1) {
+        setCurrentPoint(prev => prev + 1);
+      }
     }
   };
 
@@ -86,7 +103,7 @@ export const SetupPage = () => {
             Eye Tracking Setup
           </h1>
           <p className="text-lg text-white/80 mb-8 text-center max-w-md">
-            We&#39ll need to calibrate your eye tracking. You&#39ll need to look at and click several dots on the screen to help us understand your eye movements.
+            We'll need to calibrate your eye tracking. Follow the pulsing circles and click each point when prompted.
           </p>
           <button
             onClick={() => setCurrentStep(1)}
@@ -98,45 +115,57 @@ export const SetupPage = () => {
       ) : (
         <div className="relative min-h-screen" onClick={handleCalibrationClick}>
           {/* Calibration points */}
-          {CALIBRATION_POINTS.map((point, index) => (
+          {CALIBRATION_SEQUENCE.map((point, index) => (
             <div
               key={index}
               className="absolute w-6 h-6 transform -translate-x-1/2 -translate-y-1/2"
               style={{ left: point.x, top: point.y }}
             >
               <div className="relative">
-                <div className="absolute inset-0 bg-white/10 backdrop-blur-md rounded-full animate-ping" />
-                <div className="relative bg-white/20 backdrop-blur-md w-6 h-6 rounded-full border border-white/40 shadow-lg hover:scale-110 transition-transform cursor-pointer" />
+                {index === currentPoint && (
+                  <div className="absolute inset-0 bg-white/30 backdrop-blur-md rounded-full animate-ping" />
+                )}
+                <div 
+                  className={`relative backdrop-blur-md w-6 h-6 rounded-full border shadow-lg transition-transform cursor-pointer
+                    ${index === currentPoint ? 
+                      'bg-white/40 border-white/60 hover:scale-110' : 
+                      'bg-white/10 border-white/20'
+                    }`}
+                />
               </div>
             </div>
           ))}
 
-          {/* Feedback overlay */}
-          {showFeedback && (
-            <div className="fixed top-4 right-4 bg-white/10 backdrop-blur-md px-4 py-2 rounded-lg border border-white/20">
-              <p className="text-white">
-                Points calibrated: {calibrationPoints}
-              </p>
-            </div>
-          )}
-
-          {/* Instructions */}
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center">
-            <h2 className="font-serif text-2xl mb-2 text-white drop-shadow-lg">
-              Look at each point and click it
+          {/* Instructions - Positioned below center point */}
+          <div className="absolute top-[60%] left-1/2 transform -translate-x-1/2 text-center not-calibration-point">
+            <h2 className="font-serif text-2xl mb-2 text-white drop-shadow-lg not-calibration-point">
+              {currentPoint < CALIBRATION_SEQUENCE.length ? (
+                `Look at and click the pulsing dot (${currentPoint + 1}/${CALIBRATION_SEQUENCE.length})`
+              ) : (
+                'Calibration Complete!'
+              )}
             </h2>
-            <p className="text-white/80 mb-4">
-              This helps calibrate the eye tracking to your screen
+            <p className="text-white/80 mb-4 not-calibration-point">
+              {CALIBRATION_SEQUENCE[currentPoint]?.label || ''}
             </p>
-            {calibrationPoints >= 18 && (
+            {currentPoint >= CALIBRATION_SEQUENCE.length - 1 && (
               <button
                 onClick={() => window.location.href = '/'}
-                className="bg-white/10 backdrop-blur-md text-white px-6 py-2 rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200 border border-white/20 hover:border-white/30 hover:bg-white/20"
+                className="bg-white/10 backdrop-blur-md text-white px-6 py-2 rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200 border border-white/20 hover:border-white/30 hover:bg-white/20 not-calibration-point"
               >
                 Complete Setup
               </button>
             )}
           </div>
+
+          {/* Feedback overlay */}
+          {showFeedback && (
+            <div className="fixed top-4 right-4 bg-white/10 backdrop-blur-md px-4 py-2 rounded-lg border border-white/20 not-calibration-point">
+              <p className="text-white not-calibration-point">
+                Point Calibrated!
+              </p>
+            </div>
+          )}
         </div>
       )}
     </div>
