@@ -149,10 +149,8 @@ export const SetupPage = () => {
               {CALIBRATION_SEQUENCE[currentPoint]?.label || ''}
             </p>
             {currentPoint >= CALIBRATION_SEQUENCE.length - 1 && (
-              <button
-                onClick={() => window.location.href = '/'}
-                className="bg-white/10 backdrop-blur-md text-white px-6 py-2 rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200 border border-white/20 hover:border-white/30 hover:bg-white/20 not-calibration-point"
-              >
+              <button href="/" onClick={() => window.location.href = '/text'}
+              className="bg-white/10 backdrop-blur-md text-white px-6 py-2 rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200 border border-white/20 hover:border-white/30 hover:bg-white/20 not-calibration-point">
                 Complete Setup
               </button>
             )}
