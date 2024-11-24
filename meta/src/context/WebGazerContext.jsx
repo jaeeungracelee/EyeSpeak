@@ -9,11 +9,12 @@ export const WebGazerProvider = ({ children }) => {
   const initializeWebGazer = async () => {
     if (!isInitialized) {
       try {
-        await webgazer.begin();
+        await webgazer.setRegression("ridge").setTracker("TFFacemesh").begin();
 
         // Set default configurations
-        webgazer.showVideo(false);
-        webgazer.showPredictionPoints(true);
+        window.webgazer.showVideo(true);
+        window.webgazer.showFaceOverlay(true);
+        window.webgazer.showPredictionPoints(true);
 
         setIsInitialized(true);
         return true;
@@ -29,12 +30,11 @@ export const WebGazerProvider = ({ children }) => {
     const videoElement = document.getElementById("webgazerVideoContainer");
     if (videoElement) {
       videoElement.style.position = "absolute";
-      videoElement.style.top = top;
+      videoElement.style.top = "30%";
       videoElement.style.left = "50%";
-      videoElement.style.transform = "translate(-50%, -50%) scale(0.85)";
+      videoElement.style.transform = "translate(-50%, -50%)";
       videoElement.style.zIndex = "1000";
       videoElement.style.backgroundColor = "transparent";
-      videoElement.style.display = "none";
     }
   };
 

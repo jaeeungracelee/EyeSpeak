@@ -32,6 +32,7 @@ export const SetupPage = () => {
         const success = await initializeWebGazer();
         if (success) {
           setWebgazerInitialized(true);
+          positionVideo();
         }
 
         setWebgazerInitialized(true);
