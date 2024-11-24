@@ -313,7 +313,7 @@
               </div>
 
               {/* Instructions */}
-              <div className="text-center font-poppins text-custom-white/80 text-lg">
+              <div className="text-center font-poppins text-custom-white/80 text-lg flex flex-col">
                 Current Mode: {modes[modeIndex % modes.length].toUpperCase()}
               </div>
             </div>

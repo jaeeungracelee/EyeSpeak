@@ -126,10 +126,10 @@ export const EyeSettingsPage = () => {
             <H1 className="text-custom-white text-3xl">Eye Tracking Settings</H1>
           </div>
           <button
-            onClick={() => window.location.href = '/text-entry'}
+            onClick={() => window.location.href = '/'}
             className="bg-custom-white/10 text-custom-white font-bold px-6 py-3 rounded-lg shadow-lg hover:bg-custom-white/20 hover:scale-105 transition-transform border border-custom-white/40 hover:border-custom-white/60"
           >
-            Start Text Entry
+            Home
           </button>
         </div>
       </nav>
