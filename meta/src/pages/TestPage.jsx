@@ -359,4 +359,5 @@ const DirectionIndicator = ({ direction }) => {
     </div>
   );
 };
+
 export default TestPage;
