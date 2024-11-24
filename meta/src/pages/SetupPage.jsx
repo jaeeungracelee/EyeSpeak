@@ -19,6 +19,8 @@ const CALIBRATION_SEQUENCE = [
 ];
 
 export const SetupPage = () => {
+  const { initializeWebGazer, positionVideo } = useWebGazer();
+  const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
   const [webgazerInitialized, setWebgazerInitialized] = useState(false);
   const [currentPoint, setCurrentPoint] = useState(0);
@@ -36,16 +38,8 @@ export const SetupPage = () => {
       }
     };
 
-    if (currentStep > 0 && !webgazerInitialized) {
-      initWebGazer();
-    }
-
-    return () => {
-      if (webgazerInitialized) {
-        window.webgazer.end();
-      }
-    };
-  }, [currentStep, webgazerInitialized]);
+    init();
+  }, [currentStep, initializeWebGazer, positionVideo]);
 
   const handleCalibrationClick = (e) => {
     if (
