@@ -24,15 +24,6 @@ const CALIBRATION_SEQUENCE = [
   { x: "10%", y: "50%", label: "Middle Left" },
   { x: "90%", y: "50%", label: "Middle Right" },
   { x: "50%", y: "50%", label: "Center" },
-  { x: "10%", y: "10%", label: "Top Left" },
-  { x: "90%", y: "90%", label: "Bottom Right" },
-  { x: "90%", y: "10%", label: "Top Right" },
-  { x: "10%", y: "90%", label: "Bottom Left" },
-  { x: "50%", y: "10%", label: "Top Center" },
-  { x: "50%", y: "90%", label: "Bottom Center" },
-  { x: "10%", y: "50%", label: "Middle Left" },
-  { x: "90%", y: "50%", label: "Middle Right" },
-  { x: "50%", y: "50%", label: "Center" },
 ];
 
 export const SetupPage = () => {

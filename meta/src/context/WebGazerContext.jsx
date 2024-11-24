@@ -15,7 +15,7 @@ export const WebGazerProvider = ({ children }) => {
           .begin();
 
         // Remove the line that shows the video
-        window.webgazer.showVideo(true);
+        // window.webgazer.showVideo(true);
 
         // Keep other configurations
         window.webgazer.showFaceOverlay(true);

@@ -58,13 +58,17 @@ const TextInputPage = () => {
   }, []);
 
   const getPredictionForRegion = (region) => {
-    const letterRange = GAZE_REGIONS[region].label;
+    // Handle 'clear' and 'delete' regions
+    if (region === "clear" || region === "delete") {
+      return [region.toUpperCase(), "", ""];
+    }
+
+    const letterRange = GAZE_REGIONS[region]?.label || "Unknown";
+    const index = Object.keys(GAZE_REGIONS).indexOf(region);
     const word =
-      wordOptions[Object.keys(GAZE_REGIONS).indexOf(region)]?.prompt ||
-      "No prediction available";
+      wordOptions[index]?.prompt || "No prediction available";
     const sentence =
-      sentenceOptions[Object.keys(GAZE_REGIONS).indexOf(region)] ||
-      "No prediction available";
+      sentenceOptions[index] || "No prediction available";
 
     const modeOrder = [
       modes[modeIndex % modes.length],
@@ -139,27 +143,6 @@ const TextInputPage = () => {
   useEffect(() => {
     const gazeListener = async (data, elapsedTime) => {
       if (!data) return;
-
-      // Eye closure detection
-      const prediction = await window.webgazer.getCurrentPrediction();
-      const isEyesClosed = prediction === null;
-
-      if (isEyesClosed) {
-        if (!eyeClosedStartTime) {
-          setEyeClosedStartTime(Date.now());
-        } else {
-          const eyeClosedDuration = Date.now() - eyeClosedStartTime;
-          if (eyeClosedDuration >= EYE_CLOSED_THRESHOLD && !eyesClosed) {
-            // Eyes have been closed long enough to trigger mode switch
-            setEyesClosed(true);
-            setModeIndex((prev) => (prev + 1) % modes.length);
-          }
-        }
-      } else {
-        setEyeClosedStartTime(null);
-        setEyesClosed(false);
-      }
-
       const region = getGazeRegion(data.x, data.y);
 
       if (region !== currentGaze) {
@@ -194,24 +177,31 @@ const TextInputPage = () => {
   useEffect(() => {
     if (!activeRegion) return;
 
-    const currentMode = modes[modeIndex % modes.length];
+    // Handle 'clear' and 'delete' regions
+    if (activeRegion === "clear") {
+      setInputText("");
+    } else if (activeRegion === "delete") {
+      setInputText((prev) => prev.slice(0, -1));
+    } else {
+      const currentMode = modes[modeIndex % modes.length];
 
-    if (currentMode === "character") {
-      const label = GAZE_REGIONS[activeRegion].label;
-      setInputText((prev) => prev + label + " ");
-      const selectedRanges = inputText
-        .trim()
-        .split(" ")
-        .concat(label.trim());
-      fetchPredictions(selectedRanges);
-    } else if (currentMode === "word") {
-      const index = Object.keys(GAZE_REGIONS).indexOf(activeRegion);
-      const word = wordOptions[index]?.prompt || "";
-      setInputText((prev) => prev + word + " ");
-    } else if (currentMode === "sentence") {
-      const index = Object.keys(GAZE_REGIONS).indexOf(activeRegion);
-      const sentence = sentenceOptions[index] || "";
-      setInputText((prev) => prev + sentence + " ");
+      if (currentMode === "character") {
+        const label = GAZE_REGIONS[activeRegion]?.label || "";
+        setInputText((prev) => prev + label + " ");
+        const selectedRanges = inputText
+          .trim()
+          .split(" ")
+          .concat(label.trim());
+        fetchPredictions(selectedRanges);
+      } else if (currentMode === "word") {
+        const index = Object.keys(GAZE_REGIONS).indexOf(activeRegion);
+        const word = wordOptions[index]?.prompt || "";
+        setInputText((prev) => prev + word + " ");
+      } else if (currentMode === "sentence") {
+        const index = Object.keys(GAZE_REGIONS).indexOf(activeRegion);
+        const sentence = sentenceOptions[index] || "";
+        setInputText((prev) => prev + sentence + " ");
+      }
     }
 
     setActiveRegion(null);
@@ -232,7 +222,6 @@ const TextInputPage = () => {
       <div className="absolute inset-0 bg-gradient-to-br from-blue-200 via-purple-300 to-pink-200 opacity-70" />
       <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-400 rounded-full mix-blend-multiply filter blur-3xl animate-blob opacity-30" />
       <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-pink-400 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-2000 opacity-30" />
-
 
       {/* Letter regions */}
       <div className="relative w-full h-screen grid grid-cols-3 grid-rows-3 gap-8 p-8">
