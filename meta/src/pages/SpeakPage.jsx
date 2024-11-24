@@ -36,7 +36,7 @@ const SpeakPage = () => {
       if (x < screenWidth * 0.4) return "left-up";
       if (x > screenWidth * 0.6) return "right-up";
       if (x >= screenWidth * 0.4 && x <= screenWidth * 0.6) return "mode-switch";
-    } else if (y > screenHeight * 0.6) {
+    } else if (y > screenHeight * 0.5) {
       if (x < screenWidth * 0.4) return "left-down";
       if (x > screenWidth * 0.6) return "right-down";
     }
@@ -242,10 +242,10 @@ const SpeakPage = () => {
                   {convertHyphenFormat(predictions[0])}
                 </div>
                 <div className="font-serif text-3xl text-gray-200">
-                  {predictions[1]}
+                  {convertHyphenFormat(predictions[1])}
                 </div>
                 <div className="font-serif text-2xl text-gray-400">
-                  {predictions[2]}
+                  {convertHyphenFormat(predictions[2])}
                 </div>
               </>
             );
@@ -285,10 +285,10 @@ const SpeakPage = () => {
                   {convertHyphenFormat(predictions[0])}
                 </div>
                 <div className="font-serif text-3xl text-gray-200">
-                  {predictions[1]}
+                  {convertHyphenFormat(predictions[1])}
                 </div>
                 <div className="font-serif text-2xl text-gray-400">
-                  {predictions[2]}
+                  {convertHyphenFormat(predictions[2])}
                 </div>
               </>
             );
@@ -319,13 +319,7 @@ const SpeakPage = () => {
             </button>
           </div>
 
-          {/* Instructions */}
-          <div className="text-center text-custom-white/60 text-lg">
-            Gaze at "Switch Mode" to cycle modes
-          </div>
-          <div className="text-center text-custom-white/80 text-lg">
-            Current Mode: {modes[modeIndex % modes.length].toUpperCase()}
-          </div>
+
         </div>
         <div></div>
 
@@ -347,10 +341,10 @@ const SpeakPage = () => {
                   {convertHyphenFormat(predictions[0])}
                 </div>
                 <div className="font-serif text-3xl text-gray-200">
-                  {predictions[1]}
+                  {convertHyphenFormat(predictions[1])}
                 </div>
                 <div className="font-serif text-2xl text-gray-400">
-                  {predictions[2]}
+                  {convertHyphenFormat(predictions[2])}
                 </div>
               </>
             );
@@ -374,10 +368,10 @@ const SpeakPage = () => {
                   {convertHyphenFormat(predictions[0])}
                 </div>
                 <div className="font-serif text-3xl text-gray-200">
-                  {predictions[1]}
+                  {convertHyphenFormat(predictions[1])}
                 </div>
                 <div className="font-serif text-2xl text-gray-400">
-                  {predictions[2]}
+                  {convertHyphenFormat(predictions[2])}
                 </div>
               </>
             );
