@@ -14,7 +14,7 @@ const GAZE_REGIONS = {
   "right-down": { letters: "U-Z", label: "U-Z" },
 };
 
-const TextInputPage = () => {
+const SpeakPage = () => {
   const { isInitialized, initializeWebGazer } = useWebGazer();
   const navigate = useNavigate();
   const [inputText, setInputText] = useState("");
@@ -218,10 +218,8 @@ const TextInputPage = () => {
 
   return (
     <div className="relative min-h-screen overflow-hidden">
-      {/* Background elements */}
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-200 via-purple-300 to-pink-200 opacity-70" />
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-400 rounded-full mix-blend-multiply filter blur-3xl animate-blob opacity-30" />
-      <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-pink-400 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-2000 opacity-30" />
+      {/* Enhanced gradient background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-berkeley via-lapis to-spring opacity-90" />
 
       {/* Letter regions */}
       <div className="relative w-full h-screen grid grid-cols-3 grid-rows-3 gap-8 p-8">
@@ -230,8 +228,8 @@ const TextInputPage = () => {
           className={`relative rounded-xl border backdrop-blur-md transition-all duration-300 flex flex-col items-center justify-center w-full h-64
               ${
                 currentGaze === "left-up"
-                  ? "bg-white/30 border-white/40 shadow-lg scale-105"
-                  : "bg-white/10 border-white/20 hover:bg-white/20 scale-100"
+                  ? "bg-custom-white/30 border-custom-white/40 shadow-lg scale-105"
+                  : "bg-custom-white/10 border-custom-white/20 hover:bg-custom-white/20"
               }
               mt-16`}
         >
@@ -239,13 +237,13 @@ const TextInputPage = () => {
             const predictions = getPredictionForRegion("left-up");
             return (
               <>
-                <div className="font-serif text-5xl text-white mb-2">
+                <div className="font-serif text-5xl text-custom-white mb-2">
                   {predictions[0]}
                 </div>
-                <div className="font-serif text-3xl text-gray-400">
+                <div className="font-serif text-3xl text-gray-200">
                   {predictions[1]}
                 </div>
-                <div className="font-serif text-2xl text-gray-600">
+                <div className="font-serif text-2xl text-gray-400">
                   {predictions[2]}
                 </div>
               </>
@@ -257,8 +255,8 @@ const TextInputPage = () => {
           className={`relative rounded-xl border backdrop-blur-md transition-all duration-300 flex flex-col items-center justify-center w-full h-64
               ${
                 currentGaze === "right-up"
-                  ? "bg-white/30 border-white/40 shadow-lg scale-105"
-                  : "bg-white/10 border-white/20 hover:bg-white/20 scale-100"
+                  ? "bg-custom-white/30 border-custom-white/40 shadow-lg scale-105"
+                  : "bg-custom-white/10 border-custom-white/20 hover:bg-custom-white/20"
               }
               mt-16`}
         >
@@ -266,13 +264,13 @@ const TextInputPage = () => {
             const predictions = getPredictionForRegion("right-up");
             return (
               <>
-                <div className="font-serif text-5xl text-white mb-2">
+                <div className="font-serif text-5xl text-custom-white mb-2">
                   {predictions[0]}
                 </div>
-                <div className="font-serif text-3xl text-gray-400">
+                <div className="font-serif text-3xl text-gray-200">
                   {predictions[1]}
                 </div>
-                <div className="font-serif text-2xl text-gray-600">
+                <div className="font-serif text-2xl text-gray-400">
                   {predictions[2]}
                 </div>
               </>
@@ -284,26 +282,26 @@ const TextInputPage = () => {
         <div></div>
         <div className="space-y-8">
           {/* Input field */}
-          <div className="bg-white/10 backdrop-blur-md rounded-xl p-8 border border-white/20">
-            <h3 className="font-serif text-2xl text-white mb-4">Text:</h3>
-            <div className="text-white text-xl min-h-[3rem] font-mono">
+          <div className="bg-custom-white/10 backdrop-blur-md rounded-xl p-8 border border-custom-white/20">
+            <H3 className="text-custom-white mb-4">Text:</H3>
+            <P className="text-custom-white text-xl min-h-[3rem] font-mono">
               {inputText || "|"}
-            </div>
+            </P>
           </div>
 
           {/* LLM suggestions */}
-          <div className="bg-white/10 backdrop-blur-md rounded-xl p-8 border border-white/20">
-            <h3 className="font-serif text-2xl text-white mb-4">LLM:</h3>
-            <div className="text-white/80 text-xl min-h-[3rem]">
+          <div className="bg-custom-white/10 backdrop-blur-md rounded-xl p-8 border border-custom-white/20">
+            <H3 className="text-custom-white mb-4">LLM Suggestion:</H3>
+            <P className="text-custom-white/90 text-xl min-h-[3rem]">
               {llmSuggestion || "Waiting for input..."}
-            </div>
+            </P>
           </div>
 
           {/* Control buttons */}
           <div className="flex justify-center gap-8">
             <button
               onClick={() => setInputText("")}
-              className="bg-white/10 backdrop-blur-md text-white px-8 py-4 rounded-lg border border-white/20 hover:bg-white/20 transition-all duration-200 flex items-center gap-4"
+              className="bg-custom-white/10 backdrop-blur-md text-custom-white px-8 py-4 rounded-lg border border-custom-white/20 hover:bg-custom-white/20 transition-all duration-200 flex items-center gap-4"
             >
               <RefreshCcw className="w-6 h-6" />
               Clear
@@ -311,10 +309,10 @@ const TextInputPage = () => {
           </div>
 
           {/* Instructions */}
-          <div className="text-center text-white/60 text-lg">
+          <div className="text-center text-custom-white/60 text-lg">
             Close your eyes for 1.5 seconds to switch modes
           </div>
-          <div className="text-center text-white/80 text-lg">
+          <div className="text-center text-custom-white/80 text-lg">
             Current Mode: {modes[modeIndex % modes.length].toUpperCase()}
           </div>
         </div>
@@ -325,8 +323,8 @@ const TextInputPage = () => {
           className={`relative rounded-xl border backdrop-blur-md transition-all duration-300 flex flex-col items-center justify-center w-full h-64
               ${
                 currentGaze === "left-down"
-                  ? "bg-white/30 border-white/40 shadow-lg scale-105"
-                  : "bg-white/10 border-white/20 hover:bg-white/20 scale-100"
+                  ? "bg-custom-white/30 border-custom-white/40 shadow-lg scale-105"
+                  : "bg-custom-white/10 border-custom-white/20 hover:bg-custom-white/20"
               }
               mb-16`}
         >
@@ -334,13 +332,13 @@ const TextInputPage = () => {
             const predictions = getPredictionForRegion("left-down");
             return (
               <>
-                <div className="font-serif text-5xl text-white mb-2">
+                <div className="font-serif text-5xl text-custom-white mb-2">
                   {predictions[0]}
                 </div>
-                <div className="font-serif text-3xl text-gray-400">
+                <div className="font-serif text-3xl text-gray-200">
                   {predictions[1]}
                 </div>
-                <div className="font-serif text-2xl text-gray-600">
+                <div className="font-serif text-2xl text-gray-400">
                   {predictions[2]}
                 </div>
               </>
@@ -352,8 +350,8 @@ const TextInputPage = () => {
           className={`relative rounded-xl border backdrop-blur-md transition-all duration-300 flex flex-col items-center justify-center w-full h-64
               ${
                 currentGaze === "right-down"
-                  ? "bg-white/30 border-white/40 shadow-lg scale-105"
-                  : "bg-white/10 border-white/20 hover:bg-white/20 scale-100"
+                  ? "bg-custom-white/30 border-custom-white/40 shadow-lg scale-105"
+                  : "bg-custom-white/10 border-custom-white/20 hover:bg-custom-white/20"
               }
               mb-16`}
         >
@@ -361,13 +359,13 @@ const TextInputPage = () => {
             const predictions = getPredictionForRegion("right-down");
             return (
               <>
-                <div className="font-serif text-5xl text-white mb-2">
+                <div className="font-serif text-5xl text-custom-white mb-2">
                   {predictions[0]}
                 </div>
-                <div className="font-serif text-3xl text-gray-400">
+                <div className="font-serif text-3xl text-gray-200">
                   {predictions[1]}
                 </div>
-                <div className="font-serif text-2xl text-gray-600">
+                <div className="font-serif text-2xl text-gray-400">
                   {predictions[2]}
                 </div>
               </>
@@ -379,4 +377,4 @@ const TextInputPage = () => {
   );
 };
 
-export default TextInputPage;
+export default SpeakPage;
