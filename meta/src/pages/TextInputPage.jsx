@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { RefreshCcw } from "lucide-react";
 
 const GAZE_THRESHOLD = 1000; // 1 second
+const EYE_CLOSED_THRESHOLD = 1500; // 1.5 seconds
 const GAZE_REGIONS = {
   "left-up": { letters: "A-F", label: "A-F" },
   "right-up": { letters: "G-M", label: "G-M" },
@@ -22,11 +23,13 @@ const TextInputPage = () => {
   const [currentGaze, setCurrentGaze] = useState("center");
   const [gazeStartTime, setGazeStartTime] = useState(null);
   const [activeRegion, setActiveRegion] = useState(null);
-  const [isCharacterMode, setIsCharacterMode] = useState(true);
-  const [isWordMode, setIsWordMode] = useState(false);
-  const [isSentenceMode, setIsSentenceMode] = useState(false);
+  const [modeIndex, setModeIndex] = useState(0); // 0: Character, 1: Word, 2: Sentence
   const [wordOptions, setWordOptions] = useState([]);
   const [sentenceOptions, setSentenceOptions] = useState([]);
+  const [eyeClosedStartTime, setEyeClosedStartTime] = useState(null);
+  const [eyesClosed, setEyesClosed] = useState(false);
+
+  const modes = ["character", "word", "sentence"];
 
   const getGazeRegion = useCallback((x, y) => {
     const screenWidth = window.innerWidth;
@@ -55,15 +58,27 @@ const TextInputPage = () => {
     return "center";
   }, []);
 
-  const getPredictionForRegion = (region, mode) => {
-    if (mode === "character") {
-      return GAZE_REGIONS[region].label;
-    } else if (mode === "word") {
-      const index = Object.keys(GAZE_REGIONS).indexOf(region);
-      return wordOptions[index]?.prompt || "No prediction available";
-    } else if (mode === "sentence") {
-      const index = Object.keys(GAZE_REGIONS).indexOf(region);
-      return sentenceOptions[index] || "No prediction available";
+  const getPredictionForRegion = (region) => {
+    const letterRange = GAZE_REGIONS[region].label;
+    const word =
+      wordOptions[Object.keys(GAZE_REGIONS).indexOf(region)]?.prompt ||
+      "No prediction available";
+    const sentence =
+      sentenceOptions[Object.keys(GAZE_REGIONS).indexOf(region)] ||
+      "No prediction available";
+
+    const modeOrder = [
+      modes[modeIndex % modes.length],
+      modes[(modeIndex + 1) % modes.length],
+      modes[(modeIndex + 2) % modes.length],
+    ];
+
+    if (modeOrder[0] === "character") {
+      return [letterRange, word, sentence];
+    } else if (modeOrder[0] === "word") {
+      return [word, sentence, letterRange];
+    } else if (modeOrder[0] === "sentence") {
+      return [sentence, letterRange, word];
     }
   };
 
@@ -123,8 +138,29 @@ const TextInputPage = () => {
   }, [isInitialized, initializeWebGazer, navigate]);
 
   useEffect(() => {
-    const gazeListener = (data) => {
+    const gazeListener = async (data, elapsedTime) => {
       if (!data) return;
+
+      // Eye closure detection
+      const prediction = await window.webgazer.getCurrentPrediction();
+      const isEyesClosed = prediction === null;
+
+      if (isEyesClosed) {
+        if (!eyeClosedStartTime) {
+          setEyeClosedStartTime(Date.now());
+        } else {
+          const eyeClosedDuration = Date.now() - eyeClosedStartTime;
+          if (eyeClosedDuration >= EYE_CLOSED_THRESHOLD && !eyesClosed) {
+            // Eyes have been closed long enough to trigger mode switch
+            setEyesClosed(true);
+            setModeIndex((prev) => (prev + 1) % modes.length);
+          }
+        }
+      } else {
+        setEyeClosedStartTime(null);
+        setEyesClosed(false);
+      }
+
       const region = getGazeRegion(data.x, data.y);
 
       if (region !== currentGaze) {
@@ -151,25 +187,29 @@ const TextInputPage = () => {
     currentGaze,
     gazeStartTime,
     activeRegion,
+    eyeClosedStartTime,
+    eyesClosed,
+    modes.length,
   ]);
 
   useEffect(() => {
     if (!activeRegion) return;
 
-    if (isCharacterMode) {
+    const currentMode = modes[modeIndex % modes.length];
+
+    if (currentMode === "character") {
       const label = GAZE_REGIONS[activeRegion].label;
       setInputText((prev) => prev + label + " ");
-      // Here you can collect letter ranges for prediction
       const selectedRanges = inputText
         .trim()
         .split(" ")
         .concat(label.trim());
       fetchPredictions(selectedRanges);
-    } else if (isWordMode) {
+    } else if (currentMode === "word") {
       const index = Object.keys(GAZE_REGIONS).indexOf(activeRegion);
       const word = wordOptions[index]?.prompt || "";
       setInputText((prev) => prev + word + " ");
-    } else if (isSentenceMode) {
+    } else if (currentMode === "sentence") {
       const index = Object.keys(GAZE_REGIONS).indexOf(activeRegion);
       const sentence = sentenceOptions[index] || "";
       setInputText((prev) => prev + sentence + " ");
@@ -177,7 +217,7 @@ const TextInputPage = () => {
 
     setActiveRegion(null);
     setGazeStartTime(null);
-  }, [activeRegion, isCharacterMode, isWordMode, isSentenceMode, inputText]);
+  }, [activeRegion, modeIndex, inputText, modes]);
 
   // Initialize predictions when the component mounts
   useEffect(() => {
@@ -207,29 +247,22 @@ const TextInputPage = () => {
               }
               mt-16`}
         >
-          <div className="font-serif text-5xl text-white mb-2">
-            {getPredictionForRegion("left-up", isCharacterMode
-              ? "character"
-              : isWordMode
-              ? "word"
-              : "sentence")}
-          </div>
-          <div className="font-serif text-3xl text-gray-400">
-            {getPredictionForRegion("left-up", isCharacterMode
-              ? isWordMode
-                ? "word"
-                : "sentence"
-              : isCharacterMode
-              ? "character"
-              : "word")}
-          </div>
-          <div className="font-serif text-2xl text-gray-600">
-            {getPredictionForRegion("left-up", isCharacterMode
-              ? "sentence"
-              : isWordMode
-              ? "character"
-              : "word")}
-          </div>
+          {(() => {
+            const predictions = getPredictionForRegion("left-up");
+            return (
+              <>
+                <div className="font-serif text-5xl text-white mb-2">
+                  {predictions[0]}
+                </div>
+                <div className="font-serif text-3xl text-gray-400">
+                  {predictions[1]}
+                </div>
+                <div className="font-serif text-2xl text-gray-600">
+                  {predictions[2]}
+                </div>
+              </>
+            );
+          })()}
         </div>
         <div></div>
         <div
@@ -241,29 +274,22 @@ const TextInputPage = () => {
               }
               mt-16`}
         >
-          <div className="font-serif text-5xl text-white mb-2">
-            {getPredictionForRegion("right-up", isCharacterMode
-              ? "character"
-              : isWordMode
-              ? "word"
-              : "sentence")}
-          </div>
-          <div className="font-serif text-3xl text-gray-400">
-            {getPredictionForRegion("right-up", isCharacterMode
-              ? isWordMode
-                ? "word"
-                : "sentence"
-              : isCharacterMode
-              ? "character"
-              : "word")}
-          </div>
-          <div className="font-serif text-2xl text-gray-600">
-            {getPredictionForRegion("right-up", isCharacterMode
-              ? "sentence"
-              : isWordMode
-              ? "character"
-              : "word")}
-          </div>
+          {(() => {
+            const predictions = getPredictionForRegion("right-up");
+            return (
+              <>
+                <div className="font-serif text-5xl text-white mb-2">
+                  {predictions[0]}
+                </div>
+                <div className="font-serif text-3xl text-gray-400">
+                  {predictions[1]}
+                </div>
+                <div className="font-serif text-2xl text-gray-600">
+                  {predictions[2]}
+                </div>
+              </>
+            );
+          })()}
         </div>
 
         {/* Middle row */}
@@ -298,7 +324,10 @@ const TextInputPage = () => {
 
           {/* Instructions */}
           <div className="text-center text-white/60 text-lg">
-            Look at the center to reset selection
+            Close your eyes for 1.5 seconds to switch modes
+          </div>
+          <div className="text-center text-white/80 text-lg">
+            Current Mode: {modes[modeIndex % modes.length].toUpperCase()}
           </div>
         </div>
         <div></div>
@@ -313,29 +342,22 @@ const TextInputPage = () => {
               }
               mb-16`}
         >
-          <div className="font-serif text-5xl text-white mb-2">
-            {getPredictionForRegion("left-down", isCharacterMode
-              ? "character"
-              : isWordMode
-              ? "word"
-              : "sentence")}
-          </div>
-          <div className="font-serif text-3xl text-gray-400">
-            {getPredictionForRegion("left-down", isCharacterMode
-              ? isWordMode
-                ? "word"
-                : "sentence"
-              : isCharacterMode
-              ? "character"
-              : "word")}
-          </div>
-          <div className="font-serif text-2xl text-gray-600">
-            {getPredictionForRegion("left-down", isCharacterMode
-              ? "sentence"
-              : isWordMode
-              ? "character"
-              : "word")}
-          </div>
+          {(() => {
+            const predictions = getPredictionForRegion("left-down");
+            return (
+              <>
+                <div className="font-serif text-5xl text-white mb-2">
+                  {predictions[0]}
+                </div>
+                <div className="font-serif text-3xl text-gray-400">
+                  {predictions[1]}
+                </div>
+                <div className="font-serif text-2xl text-gray-600">
+                  {predictions[2]}
+                </div>
+              </>
+            );
+          })()}
         </div>
         <div></div>
         <div
@@ -347,29 +369,22 @@ const TextInputPage = () => {
               }
               mb-16`}
         >
-          <div className="font-serif text-5xl text-white mb-2">
-            {getPredictionForRegion("right-down", isCharacterMode
-              ? "character"
-              : isWordMode
-              ? "word"
-              : "sentence")}
-          </div>
-          <div className="font-serif text-3xl text-gray-400">
-            {getPredictionForRegion("right-down", isCharacterMode
-              ? isWordMode
-                ? "word"
-                : "sentence"
-              : isCharacterMode
-              ? "character"
-              : "word")}
-          </div>
-          <div className="font-serif text-2xl text-gray-600">
-            {getPredictionForRegion("right-down", isCharacterMode
-              ? "sentence"
-              : isWordMode
-              ? "character"
-              : "word")}
-          </div>
+          {(() => {
+            const predictions = getPredictionForRegion("right-down");
+            return (
+              <>
+                <div className="font-serif text-5xl text-white mb-2">
+                  {predictions[0]}
+                </div>
+                <div className="font-serif text-3xl text-gray-400">
+                  {predictions[1]}
+                </div>
+                <div className="font-serif text-2xl text-gray-600">
+                  {predictions[2]}
+                </div>
+              </>
+            );
+          })()}
         </div>
       </div>
     </div>
