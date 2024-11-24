@@ -18,7 +18,6 @@
     const { isInitialized, initializeWebGazer } = useWebGazer();
     const navigate = useNavigate();
     const [inputText, setInputText] = useState("");
-    const [llmSuggestion, setLlmSuggestion] = useState("");
     const [currentGaze, setCurrentGaze] = useState("center");
     const [gazeStartTime, setGazeStartTime] = useState(null);
     const [activeRegion, setActiveRegion] = useState(null);
@@ -26,31 +25,40 @@
     const [wordOptions, setWordOptions] = useState([]);
     const [sentenceOptions, setSentenceOptions] = useState([]);
     const [contextText, setContextText] = useState("");
+    const [letterRanges, setLetterRanges] = useState([]); // Tracks current letter ranges
     const modes = ["character", "word", "sentence"];
 
     const getGazeRegion = useCallback((x, y) => {
       const screenWidth = window.innerWidth;
       const screenHeight = window.innerHeight;
 
-    if (y < screenHeight * 0.4) {
-      if (x < screenWidth * 0.4) return "left-up";
-      if (x > screenWidth * 0.6) return "right-up";
-      if (x >= screenWidth * 0.4 && x <= screenWidth * 0.6) return "mode-switch";
-    } else if (y > screenHeight * 0.5) {
-      if (x < screenWidth * 0.4) return "left-down";
-      if (x > screenWidth * 0.6) return "right-down";
-    }
-      if (y < screenHeight * 0.4) {
+      if (y < screenHeight * 0.45) {
         if (x < screenWidth * 0.4) return "left-up";
         if (x > screenWidth * 0.6) return "right-up";
         if (x >= screenWidth * 0.4 && x <= screenWidth * 0.6) return "mode-switch";
-      } else if (y > screenHeight * 0.6) {
+      } else if (y > screenHeight * 0.55) {
         if (x < screenWidth * 0.4) return "left-down";
         if (x > screenWidth * 0.6) return "right-down";
       }
 
       return "center";
     }, []);
+
+    const updateInputText = (newInput, mode) => {
+      if (mode === "word") {
+        const currentInput = inputText.trim();
+        const rangesToReplace = letterRanges.join(" ");
+  
+        // Replace the most recent letter ranges with the selected word
+        const updatedText = currentInput.replace(rangesToReplace, newInput).trim();
+        setInputText(updatedText + " "); // Add a space after the word
+        setLetterRanges([]); // Clear the stored letter ranges
+      } else if (mode === "sentence") {
+        // Replace the entire input with the selected sentence
+        setInputText(newInput);
+        setLetterRanges([]); // Clear the stored letter ranges
+      }
+    };
     
     const getPredictionForRegion = (region) => {
       if (region === "mode-switch") {
@@ -166,15 +174,16 @@
 
     useEffect(() => {
       if (!activeRegion) return;
-
+  
       if (activeRegion === "mode-switch") {
         setModeIndex((prev) => (prev + 1) % modes.length);
       } else {
         const currentMode = modes[modeIndex % modes.length];
-
+  
         if (currentMode === "character") {
           const label = GAZE_REGIONS[activeRegion]?.label || "";
-          setInputText((prev) => prev + label + " ");
+          setInputText((prev) => `${prev} ${label}`.trim());
+          setLetterRanges((prev) => [...prev, label]); // Track added letter ranges
           const selectedRanges = inputText
             .trim()
             .split(" ")
@@ -183,17 +192,17 @@
         } else if (currentMode === "word") {
           const index = Object.keys(GAZE_REGIONS).indexOf(activeRegion);
           const word = wordOptions[index]?.prompt || "";
-          setInputText((prev) => prev + word + " ");
+          updateInputText(word, "word");
         } else if (currentMode === "sentence") {
           const index = Object.keys(GAZE_REGIONS).indexOf(activeRegion);
           const sentence = sentenceOptions[index] || "";
-          setInputText((prev) => sentence + " ");
+          updateInputText(sentence, "sentence");
         }
       }
-
+  
       setActiveRegion(null);
       setGazeStartTime(null);
-    }, [activeRegion, modeIndex, inputText, modes]);
+    }, [activeRegion, modeIndex, inputText, modes, letterRanges, wordOptions, sentenceOptions]);
 
     useEffect(() => {
       const initialRanges = Object.values(GAZE_REGIONS).map(
@@ -319,102 +328,6 @@
                   Clear
                 </button>
               </div>
-      {/* Letter regions */}
-      <div className="relative w-full h-screen grid grid-cols-3 grid-rows-3 gap-8 p-8">
-        {/* Top row */}
-        <div
-          className={`relative rounded-xl border backdrop-blur-md transition-all duration-300 flex flex-col items-center justify-center w-full h-64
-              ${
-                currentGaze === "left-up"
-                  ? "bg-custom-white/30 border-custom-white/40 shadow-lg scale-105"
-                  : "bg-custom-white/10 border-custom-white/20 hover:bg-custom-white/20"
-              }
-              mt-16`}
-        >
-          {(() => {
-            const predictions = getPredictionForRegion("left-up");
-            return (
-              <>
-                <div className="font-serif text-5xl text-custom-white mb-2">
-                  {convertHyphenFormat(predictions[0])}
-                </div>
-                <div className="font-serif text-3xl text-gray-200">
-                  {convertHyphenFormat(predictions[1])}
-                </div>
-                <div className="font-serif text-2xl text-gray-400">
-                  {convertHyphenFormat(predictions[2])}
-                </div>
-              </>
-            );
-          })()}
-        </div>
-        {/* Mode Switch Zone */}
-        <div
-          className={`relative rounded-xl border backdrop-blur-md transition-all duration-300 flex flex-col items-center justify-center w-full h-64
-              ${
-                currentGaze === "mode-switch"
-                  ? "bg-custom-white/30 border-custom-white/40 shadow-lg scale-105"
-                  : "bg-custom-white/10 border-custom-white/20 hover:bg-custom-white/20"
-              }
-              mt-16`}
-        >
-          <div className="font-serif text-5xl text-custom-white mb-2">
-            Switch Mode
-          </div>
-          <div className="font-serif text-3xl text-gray-200">
-            Next Mode: {modes[(modeIndex + 1) % modes.length].toUpperCase()}
-          </div>
-        </div>
-        <div
-          className={`relative rounded-xl border backdrop-blur-md transition-all duration-300 flex flex-col items-center justify-center w-full h-64
-              ${
-                currentGaze === "right-up"
-                  ? "bg-custom-white/30 border-custom-white/40 shadow-lg scale-105"
-                  : "bg-custom-white/10 border-custom-white/20 hover:bg-custom-white/20"
-              }
-              mt-16`}
-        >
-          {(() => {
-            const predictions = getPredictionForRegion("right-up");
-            return (
-              <>
-                <div className="font-serif text-5xl text-custom-white mb-2">
-                  {convertHyphenFormat(predictions[0])}
-                </div>
-                <div className="font-serif text-3xl text-gray-200">
-                  {convertHyphenFormat(predictions[1])}
-                </div>
-                <div className="font-serif text-2xl text-gray-400">
-                  {convertHyphenFormat(predictions[2])}
-                </div>
-              </>
-            );
-          })()}
-        </div>
-
-        {/* Middle row */}
-        <div></div>
-        <div className="space-y-8">
-          {/* Input field */}
-          <div className="bg-custom-white/10 backdrop-blur-md rounded-xl p-8 border border-custom-white/20">
-            <H3 className="text-custom-white mb-4">Text:</H3>
-            <P className="text-custom-white text-xl min-h-[3rem] font-mono">
-              {inputText || "|"}
-            </P>
-          </div>
-
-          <SpeechToTextComponent/>
-
-          {/* Control buttons */}
-          <div className="flex justify-center gap-8">
-            <button
-              onClick={() => setInputText("")}
-              className="bg-custom-white/10 backdrop-blur-md text-custom-white px-8 py-4 rounded-lg border border-custom-white/20 hover:bg-custom-white/20 transition-all duration-200 flex items-center gap-4"
-            >
-              <RefreshCcw className="w-6 h-6" />
-              Clear
-            </button>
-          </div>
 
               {/* Instructions */}
               <div className="text-center font-poppins text-custom-white/80 text-lg flex flex-col">
@@ -479,67 +392,5 @@
       </div>
     );
   };
-
-        </div>
-        <div></div>
-
-        {/* Bottom row */}
-        <div
-          className={`relative rounded-xl border backdrop-blur-md transition-all duration-300 flex flex-col items-center justify-center w-full h-64
-              ${
-                currentGaze === "left-down"
-                  ? "bg-custom-white/30 border-custom-white/40 shadow-lg scale-105"
-                  : "bg-custom-white/10 border-custom-white/20 hover:bg-custom-white/20"
-              }
-              mb-16`}
-        >
-          {(() => {
-            const predictions = getPredictionForRegion("left-down");
-            return (
-              <>
-                <div className="font-serif text-5xl text-custom-white mb-2">
-                  {convertHyphenFormat(predictions[0])}
-                </div>
-                <div className="font-serif text-3xl text-gray-200">
-                  {convertHyphenFormat(predictions[1])}
-                </div>
-                <div className="font-serif text-2xl text-gray-400">
-                  {convertHyphenFormat(predictions[2])}
-                </div>
-              </>
-            );
-          })()}
-        </div>
-        <div></div>
-        <div
-          className={`relative rounded-xl border backdrop-blur-md transition-all duration-300 flex flex-col items-center justify-center w-full h-64
-              ${
-                currentGaze === "right-down"
-                  ? "bg-custom-white/30 border-custom-white/40 shadow-lg scale-105"
-                  : "bg-custom-white/10 border-custom-white/20 hover:bg-custom-white/20"
-              }
-              mb-16`}
-        >
-          {(() => {
-            const predictions = getPredictionForRegion("right-down");
-            return (
-              <>
-                <div className="font-serif text-5xl text-custom-white mb-2">
-                  {convertHyphenFormat(predictions[0])}
-                </div>
-                <div className="font-serif text-3xl text-gray-200">
-                  {convertHyphenFormat(predictions[1])}
-                </div>
-                <div className="font-serif text-2xl text-gray-400">
-                  {convertHyphenFormat(predictions[2])}
-                </div>
-              </>
-            );
-          })()}
-        </div>
-      </div>
-    </div>
-  );
-};
 
   export default SpeakPage;
