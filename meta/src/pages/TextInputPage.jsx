@@ -14,11 +14,7 @@ const GAZE_REGIONS = {
 };
 
 export const TextInputPage = () => {
-<<<<<<< Updated upstream
-  const { isInitialized, positionVideo, initializeWebGazer } = useWebGazer();
-=======
   const { isInitialized } = useWebGazer();
->>>>>>> Stashed changes
   const navigate = useNavigate();
   const [inputText, setInputText] = useState("");
   const [llmSuggestion, setLlmSuggestion] = useState("");
@@ -40,71 +36,6 @@ export const TextInputPage = () => {
 
     return "center";
   }, []);
-<<<<<<< Updated upstream
-
-  useEffect(() => {
-    const isSetupComplete = localStorage.getItem('setupComplete') === 'true';
-    if (!isSetupComplete) {
-      navigate("/");
-      return;
-    }
-
-    const init = async () => {
-      if (!isInitialized) {
-        await initializeWebGazer();
-      }
-      // Hide the video feed
-      if (window.webgazer) {
-        window.webgazer.showVideo(false);
-      }
-      // ...existing code...
-    };
-
-    init();
-
-    // Cleanup to ensure the video feed remains hidden
-    return () => {
-      if (window.webgazer) {
-        window.webgazer.showVideo(false);
-      }
-    };
-  }, [isInitialized, initializeWebGazer, navigate]);
-  // console.log("Current Gaze" + currentGaze);
-  // useEffect(() => {
-  //   const mouseMove = (e) => {
-  //     // console.log(e.clientX);
-  //     // console.log(e.clientY);
-  //     const region = getGazeRegion(e.clientX, e.clientY);
-  //     // console.log("cur region: " + curRegion);
-  //     // console.log("new region: " + region);
-  //     // console.log("cur gaze: " + currentGaze);
-  //     if (region != null) {
-  //       setCurRegion(region);
-  //       setCurrentGaze(region);
-  //     }
-  //     if (curRegion === "center") {
-  //       // setGazeStartTime(null);
-  //       // setActiveRegion(null);
-  //     } else if (!checkRegionGaze(region)) {
-  //       if (region != null && gazeStartTime === null) {
-  //         setGazeStartTime(Date.now());
-  //       }
-  //     } else if (gazeStartTime && !activeRegion) {
-  //       const gazeTime = Date.now() - gazeStartTime;
-  //       console.log("gazeTime: " + gazeTime);
-  //       if (gazeTime >= GAZE_THRESHOLD) {
-  //         setActiveRegion(curRegion);
-  //         const letters = GAZE_REGIONS[activeRegion].letters;
-  //         setInputText((prev) => prev + letters[0]);
-  //         setActiveRegion(null);
-  //         setGazeStartTime(null);
-  //       }
-  //     }
-  //     console.log(gazeStartTime);
-  //   };
-  //   window.addEventListener("mousemove", mouseMove);
-=======
->>>>>>> Stashed changes
 
   useEffect(() => {
 
@@ -129,15 +60,8 @@ export const TextInputPage = () => {
     return () => {
       webgazer.clearGazeListener();
     };
-<<<<<<< Updated upstream
-  }, [isInitialized, navigate, positionVideo, currentGaze, gazeStartTime]);
-
-  
-  // console.log("region: " + activeRegion);
-=======
   }, [isInitialized, navigate, getGazeRegion, currentGaze, gazeStartTime, activeRegion]);
 
->>>>>>> Stashed changes
   useEffect(() => {
     if (!activeRegion || !GAZE_REGIONS[activeRegion]) return;
 
