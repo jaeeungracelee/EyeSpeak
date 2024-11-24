@@ -1,19 +1,21 @@
 // src/pages/SetupPage.jsx
-import { useState, useEffect } from 'react';
-import { Eye } from 'lucide-react';
-import { FilmGrain } from '../components/FilmGrain';
+import { useWebGazer } from "../context/WebGazerContext";
+import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Eye } from "lucide-react";
+import { FilmGrain } from "../components/FilmGrain";
 
 // Define calibration sequence
 const CALIBRATION_SEQUENCE = [
-  { x: '10%', y: '10%', label: 'Top Left' },
-  { x: '90%', y: '90%', label: 'Bottom Right' },
-  { x: '90%', y: '10%', label: 'Top Right' },
-  { x: '10%', y: '90%', label: 'Bottom Left' },
-  { x: '50%', y: '10%', label: 'Top Center' },
-  { x: '50%', y: '90%', label: 'Bottom Center' },
-  { x: '10%', y: '50%', label: 'Middle Left' },
-  { x: '90%', y: '50%', label: 'Middle Right' },
-  { x: '50%', y: '50%', label: 'Center' },
+  { x: "10%", y: "10%", label: "Top Left" },
+  { x: "90%", y: "90%", label: "Bottom Right" },
+  { x: "90%", y: "10%", label: "Top Right" },
+  { x: "10%", y: "90%", label: "Bottom Left" },
+  { x: "50%", y: "10%", label: "Top Center" },
+  { x: "50%", y: "90%", label: "Bottom Center" },
+  { x: "10%", y: "50%", label: "Middle Left" },
+  { x: "90%", y: "50%", label: "Middle Right" },
+  { x: "50%", y: "50%", label: "Center" },
 ];
 
 export const SetupPage = () => {
@@ -23,31 +25,14 @@ export const SetupPage = () => {
   const [showFeedback, setShowFeedback] = useState(false);
 
   useEffect(() => {
-    const initWebGazer = async () => {
-      try {
-        await window.webgazer
-          .setRegression('ridge')
-          .setTracker('TFFacemesh')
-          .begin();
-        
-        window.webgazer.showVideo(true);
-        window.webgazer.showFaceOverlay(true);
-        window.webgazer.showPredictionPoints(true);
-
-        // Position the camera preview
-        const videoElement = document.getElementById('webgazerVideoContainer');
-        if (videoElement) {
-          videoElement.style.position = 'absolute';
-          videoElement.style.top = '30%';
-          videoElement.style.left = '50%';
-          videoElement.style.transform = 'translate(-50%, -50%)';
-          videoElement.style.zIndex = '1000';
-          videoElement.style.backgroundColor = 'transparent';
+    const init = async () => {
+      if (currentStep > 0) {
+        const success = await initializeWebGazer();
+        if (success) {
+          setWebgazerInitialized(true);
         }
 
         setWebgazerInitialized(true);
-      } catch (error) {
-        console.error('Failed to initialize webgazer:', error);
       }
     };
 
@@ -63,11 +48,15 @@ export const SetupPage = () => {
   }, [currentStep, webgazerInitialized]);
 
   const handleCalibrationClick = (e) => {
-    if (!webgazerInitialized || e.target.className.includes('not-calibration-point')) return;
+    if (
+      !webgazerInitialized ||
+      e.target.className.includes("not-calibration-point")
+    )
+      return;
 
     const clickedPoint = {
       x: (e.clientX / window.innerWidth) * 100,
-      y: (e.clientY / window.innerHeight) * 100
+      y: (e.clientY / window.innerHeight) * 100,
     };
 
     const targetPoint = CALIBRATION_SEQUENCE[currentPoint];
@@ -75,15 +64,23 @@ export const SetupPage = () => {
     const targetY = parseInt(targetPoint.y);
 
     // Check if click is close to the current target point
-    if (Math.abs(clickedPoint.x - targetX) < 5 && Math.abs(clickedPoint.y - targetY) < 5) {
-      window.webgazer.recordScreenPosition(e.clientX, e.clientY, 'click');
+    if (
+      Math.abs(clickedPoint.x - targetX) < 5 &&
+      Math.abs(clickedPoint.y - targetY) < 5
+    ) {
+      window.webgazer.recordScreenPosition(e.clientX, e.clientY, "click");
       setShowFeedback(true);
       setTimeout(() => setShowFeedback(false), 500);
-      
+
       if (currentPoint < CALIBRATION_SEQUENCE.length - 1) {
-        setCurrentPoint(prev => prev + 1);
+        setCurrentPoint((prev) => prev + 1);
       }
     }
+  };
+
+  const handleComplete = () => {
+    // webgazer.saveData(); // Save calibration data
+    navigate("/text"); // Use navigate instead of window.location
   };
 
   return (
@@ -103,7 +100,8 @@ export const SetupPage = () => {
             Eye Tracking Setup
           </h1>
           <p className="text-lg text-white/80 mb-8 text-center max-w-md">
-            We'll need to calibrate your eye tracking. Follow the pulsing circles and click each point when prompted.
+            We'll need to calibrate your eye tracking. Follow the pulsing
+            circles and click each point when prompted.
           </p>
           <button
             onClick={() => setCurrentStep(1)}
@@ -125,11 +123,12 @@ export const SetupPage = () => {
                 {index === currentPoint && (
                   <div className="absolute inset-0 bg-white/30 backdrop-blur-md rounded-full animate-ping" />
                 )}
-                <div 
+                <div
                   className={`relative backdrop-blur-md w-6 h-6 rounded-full border shadow-lg transition-transform cursor-pointer
-                    ${index === currentPoint ? 
-                      'bg-white/40 border-white/60 hover:scale-110' : 
-                      'bg-white/10 border-white/20'
+                    ${
+                      index === currentPoint
+                        ? "bg-white/40 border-white/60 hover:scale-110"
+                        : "bg-white/10 border-white/20"
                     }`}
                 />
               </div>
@@ -139,18 +138,20 @@ export const SetupPage = () => {
           {/* Instructions - Positioned below center point */}
           <div className="absolute top-[60%] left-1/2 transform -translate-x-1/2 text-center not-calibration-point">
             <h2 className="font-serif text-2xl mb-2 text-white drop-shadow-lg not-calibration-point">
-              {currentPoint < CALIBRATION_SEQUENCE.length ? (
-                `Look at and click the pulsing dot (${currentPoint + 1}/${CALIBRATION_SEQUENCE.length})`
-              ) : (
-                'Calibration Complete!'
-              )}
+              {currentPoint < CALIBRATION_SEQUENCE.length
+                ? `Look at and click the pulsing dot (${currentPoint + 1}/${
+                    CALIBRATION_SEQUENCE.length
+                  })`
+                : "Calibration Complete!"}
             </h2>
             <p className="text-white/80 mb-4 not-calibration-point">
-              {CALIBRATION_SEQUENCE[currentPoint]?.label || ''}
+              {CALIBRATION_SEQUENCE[currentPoint]?.label || ""}
             </p>
             {currentPoint >= CALIBRATION_SEQUENCE.length - 1 && (
-              <button href="/" onClick={() => window.location.href = '/text'}
-              className="bg-white/10 backdrop-blur-md text-white px-6 py-2 rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200 border border-white/20 hover:border-white/30 hover:bg-white/20 not-calibration-point">
+              <button
+                onClick={handleComplete}
+                className="bg-white/10 backdrop-blur-md text-white px-6 py-2 rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200 border border-white/20 hover:border-white/30 hover:bg-white/20 not-calibration-point"
+              >
                 Complete Setup
               </button>
             )}

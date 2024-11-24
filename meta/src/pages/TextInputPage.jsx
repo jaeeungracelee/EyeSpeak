@@ -32,7 +32,45 @@ export const TextInputPage = () => {
     
     return 'center';
   }, []);
+  // console.log("Current Gaze" + currentGaze);
+  // useEffect(() => {
+  //   const mouseMove = (e) => {
+  //     // console.log(e.clientX);
+  //     // console.log(e.clientY);
+  //     const region = getGazeRegion(e.clientX, e.clientY);
+  //     // console.log("cur region: " + curRegion);
+  //     // console.log("new region: " + region);
+  //     // console.log("cur gaze: " + currentGaze);
+  //     if (region != null) {
+  //       setCurRegion(region);
+  //       setCurrentGaze(region);
+  //     }
+  //     if (curRegion === "center") {
+  //       // setGazeStartTime(null);
+  //       // setActiveRegion(null);
+  //     } else if (!checkRegionGaze(region)) {
+  //       if (region != null && gazeStartTime === null) {
+  //         setGazeStartTime(Date.now());
+  //       }
+  //     } else if (gazeStartTime && !activeRegion) {
+  //       const gazeTime = Date.now() - gazeStartTime;
+  //       console.log("gazeTime: " + gazeTime);
+  //       if (gazeTime >= GAZE_THRESHOLD) {
+  //         setActiveRegion(curRegion);
+  //         const letters = GAZE_REGIONS[activeRegion].letters;
+  //         setInputText((prev) => prev + letters[0]);
+  //         setActiveRegion(null);
+  //         setGazeStartTime(null);
+  //       }
+  //     }
+  //     console.log(gazeStartTime);
+  //   };
+  //   window.addEventListener("mousemove", mouseMove);
 
+  //   return () => {
+  //     window.removeEventListener("mousemove", mouseMove);
+  //   };
+  // }, [currentGaze, gazeStartTime]);
   useEffect(() => {
     if (!webgazer) return;
 
@@ -59,6 +97,11 @@ export const TextInputPage = () => {
     return () => webgazer.clearGazeListener();
   }, [currentGaze, gazeStartTime, getGazeRegion]);
 
+    return () => {
+      webgazer.clearGazeListener();
+    };
+  }, [isInitialized, navigate, positionVideo, currentGaze, gazeStartTime]);
+  // console.log("region: " + activeRegion);
   useEffect(() => {
     if (!activeRegion || !GAZE_REGIONS[activeRegion]) return;
     
