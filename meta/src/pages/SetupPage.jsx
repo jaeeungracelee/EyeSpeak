@@ -1,4 +1,6 @@
 // src/pages/SetupPage.jsx
+import { useWebGazer } from '../context/WebGazerContext';
+import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { Eye } from 'lucide-react';
 import { FilmGrain } from '../components/FilmGrain';
@@ -17,50 +19,27 @@ const CALIBRATION_SEQUENCE = [
 ];
 
 export const SetupPage = () => {
+  const { initializeWebGazer, positionVideo } = useWebGazer();
+  const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
   const [webgazerInitialized, setWebgazerInitialized] = useState(false);
   const [currentPoint, setCurrentPoint] = useState(0);
   const [showFeedback, setShowFeedback] = useState(false);
 
+
   useEffect(() => {
-    const initWebGazer = async () => {
-      try {
-        await window.webgazer
-          .setRegression('ridge')
-          .setTracker('TFFacemesh')
-          .begin();
-        
-        window.webgazer.showVideo(true);
-        window.webgazer.showFaceOverlay(true);
-        window.webgazer.showPredictionPoints(true);
-
-        // Position the camera preview
-        const videoElement = document.getElementById('webgazerVideoContainer');
-        if (videoElement) {
-          videoElement.style.position = 'absolute';
-          videoElement.style.top = '30%';
-          videoElement.style.left = '50%';
-          videoElement.style.transform = 'translate(-50%, -50%)';
-          videoElement.style.zIndex = '1000';
-          videoElement.style.backgroundColor = 'transparent';
+    const init = async () => {
+      if (currentStep > 0) {
+        const success = await initializeWebGazer();
+        if (success) {
+          setWebgazerInitialized(true);
+          positionVideo('30%');
         }
-
-        setWebgazerInitialized(true);
-      } catch (error) {
-        console.error('Failed to initialize webgazer:', error);
       }
     };
 
-    if (currentStep > 0 && !webgazerInitialized) {
-      initWebGazer();
-    }
-
-    return () => {
-      if (webgazerInitialized) {
-        window.webgazer.end();
-      }
-    };
-  }, [currentStep, webgazerInitialized]);
+    init();
+  }, [currentStep, initializeWebGazer, positionVideo]);
 
   const handleCalibrationClick = (e) => {
     if (!webgazerInitialized || e.target.className.includes('not-calibration-point')) return;
@@ -84,6 +63,11 @@ export const SetupPage = () => {
         setCurrentPoint(prev => prev + 1);
       }
     }
+  };
+
+  const handleComplete = () => {
+    // webgazer.saveData(); // Save calibration data
+    navigate('/text'); // Use navigate instead of window.location
   };
 
   return (
@@ -149,11 +133,13 @@ export const SetupPage = () => {
               {CALIBRATION_SEQUENCE[currentPoint]?.label || ''}
             </p>
             {currentPoint >= CALIBRATION_SEQUENCE.length - 1 && (
-              <button href="/" onClick={() => window.location.href = '/text'}
-              className="bg-white/10 backdrop-blur-md text-white px-6 py-2 rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200 border border-white/20 hover:border-white/30 hover:bg-white/20 not-calibration-point">
-                Complete Setup
-              </button>
-            )}
+                <button
+                  onClick={handleComplete}
+                  className="bg-white/10 backdrop-blur-md text-white px-6 py-2 rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200 border border-white/20 hover:border-white/30 hover:bg-white/20 not-calibration-point"
+                >
+                  Complete Setup
+                </button>
+              )}
           </div>
 
           {/* Feedback overlay */}
