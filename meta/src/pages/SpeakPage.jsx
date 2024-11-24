@@ -4,6 +4,7 @@ import { Eye, RefreshCcw } from "lucide-react";
 import { useWebGazer } from "../context/WebGazerContext";
 import { useNavigate } from "react-router-dom";
 import { H3, P } from '../components/Typography';
+import SpeechToTextComponent from '../components/SpeechToText';
 
 const GAZE_THRESHOLD = 1000; // 1 second
 const EYE_CLOSED_THRESHOLD = 1500; // 1.5 seconds
@@ -289,13 +290,7 @@ const SpeakPage = () => {
             </P>
           </div>
 
-          {/* LLM suggestions */}
-          <div className="bg-custom-white/10 backdrop-blur-md rounded-xl p-8 border border-custom-white/20">
-            <H3 className="text-custom-white mb-4">LLM Suggestion:</H3>
-            <P className="text-custom-white/90 text-xl min-h-[3rem]">
-              {llmSuggestion || "Waiting for input..."}
-            </P>
-          </div>
+          <SpeechToTextComponent/>
 
           {/* Control buttons */}
           <div className="flex justify-center gap-8">
