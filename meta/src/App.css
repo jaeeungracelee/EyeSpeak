@@ -3,6 +3,8 @@
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
+  background-color: #000; /* High contrast for background */
+  color: #fff; /* High contrast for text */
 }
 
 .logo {
@@ -11,9 +13,11 @@
   will-change: filter;
   transition: filter 300ms;
 }
+
 .logo:hover {
   filter: drop-shadow(0 0 2em #646cffaa);
 }
+
 .logo.react:hover {
   filter: drop-shadow(0 0 2em #61dafbaa);
 }
@@ -34,9 +38,84 @@
 }
 
 .card {
-  padding: 2em;
+  padding: 3em; /* Increased padding for larger clickable area */
+  border: 2px solid #fff; /* High contrast border */
+  border-radius: 10px; /* Make the cards more visually accessible */
+  background-color: #111; /* High contrast card background */
+  color: #fff; /* High contrast text */
 }
 
 .read-the-docs {
-  color: #888;
+  color: #ffffff; /* High contrast for better visibility */
+  font-size: 1.2rem; /* Larger font for better readability */
+}
+
+/* Typography adjustments for accessibility */
+h1, h2, h3, h4, p, blockquote {
+  color: #ffffff; /* Consistent high contrast color for all headings */
+}
+
+h1 {
+  font-size: 3rem; /* Larger font size for H1 */
+}
+
+h2 {
+  font-size: 2.5rem; /* Larger font size for H2 */
+}
+
+h3 {
+  font-size: 2rem; /* Larger font size for H3 */
+}
+
+h4 {
+  font-size: 1.75rem; /* Larger font size for H4 */
+}
+
+p, blockquote {
+  font-size: 1.25rem; /* Increased paragraph font size */
+  line-height: 1.8; /* More spacing for easier reading */
+}
+
+button {
+  font-size: 1.5rem; /* Increase button text size for easy reading */
+  padding: 1rem 2rem; /* Increase button padding for better accessibility */
+  background-color: #333; /* High contrast button background */
+  color: #fff; /* High contrast button text */
+  border-radius: 8px; /* Rounded corners for buttons */
+  transition: background-color 200ms ease-in-out;
+}
+
+button:hover {
+  background-color: #555; /* Hover effect with higher contrast */
+}
+
+body {
+  font-family: 'Arial', sans-serif; /* Replace with a more readable default system font */
+  background-color: #000; /* Black background for high contrast */
+  color: #fff; /* White text for high contrast */
+}
+
+/* Typography component specific styles for better readability */
+.leading-7 {
+  line-height: 2rem; /* Make the leading bigger for accessibility */
+}
+
+.text-4xl {
+  font-size: 3rem; /* Larger default size for extra-large text */
+}
+
+.text-3xl {
+  font-size: 2.5rem; /* Larger default size for H3 */
+}
+
+.text-xl {
+  font-size: 1.75rem; /* Larger default size for extra-large text */
+}
+
+.text-lg {
+  font-size: 1.5rem; /* Larger default size for large text */
+}
+
+.text-muted-foreground {
+  color: #cccccc; /* Muted color for background information */
 }

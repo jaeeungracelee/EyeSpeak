@@ -123,10 +123,10 @@ const TextInputPage = () => {
       }
     };
 
-    webgazer.setGazeListener(gazeListener);
+    window.webgazer.setGazeListener(gazeListener);
 
     return () => {
-      webgazer.clearGazeListener();
+      window.webgazer.clearGazeListener();
     };
 
   
@@ -154,64 +154,64 @@ const TextInputPage = () => {
       <div className="relative w-full h-screen grid grid-cols-3 grid-rows-3 gap-8 p-8">
         {/* Top row */}
         <div
-          className={`relative rounded-xl border backdrop-blur-md transition-all duration-300 flex flex-col items-center justify-center
+          className={`relative rounded-xl border backdrop-blur-md transition-all duration-300 flex flex-col items-center justify-center w-full h-64
             ${
               currentGaze === "left-up" ? "bg-white/30 border-white/40 shadow-lg scale-105" : "bg-white/10 border-white/20 hover:bg-white/20 scale-100"
             }
             mt-16`}
         >
-          <div className="font-serif text-4xl text-white mb-4">{GAZE_REGIONS["left-up"].label}</div>
+          <div className="font-serif text-5xl text-white mb-4">{GAZE_REGIONS["left-up"].label}</div>
         </div>
         <div></div>
         <div
-          className={`relative rounded-xl border backdrop-blur-md transition-all duration-300 flex flex-col items-center justify-center
+          className={`relative rounded-xl border backdrop-blur-md transition-all duration-300 flex flex-col items-center justify-center w-full h-64
             ${
               currentGaze === "right-up" ? "bg-white/30 border-white/40 shadow-lg scale-105" : "bg-white/10 border-white/20 hover:bg-white/20 scale-100"
             }
             mt-16`}
         >
-          <div className="font-serif text-4xl text-white mb-4">{GAZE_REGIONS["right-up"].label}</div>
+          <div className="font-serif text-5xl text-white mb-4">{GAZE_REGIONS["right-up"].label}</div>
         </div>
 
         {/* Middle row */}
         <div></div>
-        <div className="space-y-4">
+        <div className="space-y-8">
           {/* Input field */}
-          <div className="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/20">
-            <h3 className="font-serif text-xl text-white mb-2">Text:</h3>
-            <div className="text-white text-lg min-h-[2rem] font-mono">
+          <div className="bg-white/10 backdrop-blur-md rounded-xl p-8 border border-white/20">
+            <h3 className="font-serif text-2xl text-white mb-4">Text:</h3>
+            <div className="text-white text-xl min-h-[3rem] font-mono">
               {inputText || "|"}
             </div>
           </div>
 
           {/* LLM suggestions */}
-          <div className="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/20">
-            <h3 className="font-serif text-xl text-white mb-2">LLM:</h3>
-            <div className="text-white/80 text-lg min-h-[2rem]">
+          <div className="bg-white/10 backdrop-blur-md rounded-xl p-8 border border-white/20">
+            <h3 className="font-serif text-2xl text-white mb-4">LLM:</h3>
+            <div className="text-white/80 text-xl min-h-[3rem]">
               {llmSuggestion || "Waiting for input..."}
             </div>
           </div>
 
           {/* Control buttons */}
-          <div className="flex justify-center gap-4">
+          <div className="flex justify-center gap-8">
             <button
               onClick={() => setInputText("")}
-              className="bg-white/10 backdrop-blur-md text-white px-6 py-3 rounded-lg border border-white/20 hover:bg-white/20 transition-all duration-200 flex items-center gap-2"
+              className="bg-white/10 backdrop-blur-md text-white px-8 py-4 rounded-lg border border-white/20 hover:bg-white/20 transition-all duration-200 flex items-center gap-4"
             >
-              <RefreshCcw className="w-4 h-4" />
+              <RefreshCcw className="w-6 h-6" />
               Clear
             </button>
             <button
               onClick={() => setInputText((prev) => prev.slice(0, -4))}
-              className="bg-white/10 backdrop-blur-md text-white px-6 py-3 rounded-lg border border-white/20 hover:bg-white/20 transition-all duration-200 flex items-center gap-2"
+              className="bg-white/10 backdrop-blur-md text-white px-8 py-4 rounded-lg border border-white/20 hover:bg-white/20 transition-all duration-200 flex items-center gap-4"
             >
-              <X className="w-4 h-4" />
+              <X className="w-6 h-6" />
               Delete
             </button>
           </div>
 
           {/* Instructions */}
-          <div className="text-center text-white/60 text-sm">
+          <div className="text-center text-white/60 text-lg">
             Look at the center to reset selection
           </div>
         </div>
@@ -219,23 +219,23 @@ const TextInputPage = () => {
 
         {/* Bottom row */}
         <div
-          className={`relative rounded-xl border backdrop-blur-md transition-all duration-300 flex flex-col items-center justify-center
+          className={`relative rounded-xl border backdrop-blur-md transition-all duration-300 flex flex-col items-center justify-center w-full h-64
             ${
               currentGaze === "left-down" ? "bg-white/30 border-white/40 shadow-lg scale-105" : "bg-white/10 border-white/20 hover:bg-white/20 scale-100"
             }
             mb-16`}
         >
-          <div className="font-serif text-4xl text-white mb-4">{GAZE_REGIONS["left-down"].label}</div>
+          <div className="font-serif text-5xl text-white mb-4">{GAZE_REGIONS["left-down"].label}</div>
         </div>
         <div></div>
         <div
-          className={`relative rounded-xl border backdrop-blur-md transition-all duration-300 flex flex-col items-center justify-center
+          className={`relative rounded-xl border backdrop-blur-md transition-all duration-300 flex flex-col items-center justify-center w-full h-64
             ${
               currentGaze === "right-down" ? "bg-white/30 border-white/40 shadow-lg scale-105" : "bg-white/10 border-white/20 hover:bg-white/20 scale-100"
             }
             mb-16`}
         >
-          <div className="font-serif text-4xl text-white mb-4">{GAZE_REGIONS["right-down"].label}</div>
+          <div className="font-serif text-5xl text-white mb-4">{GAZE_REGIONS["right-down"].label}</div>
         </div>
       </div>
     </div>
