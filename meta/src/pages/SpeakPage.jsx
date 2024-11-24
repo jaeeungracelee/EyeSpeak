@@ -179,7 +179,7 @@
         } else if (currentMode === "sentence") {
           const index = Object.keys(GAZE_REGIONS).indexOf(activeRegion);
           const sentence = sentenceOptions[index] || "";
-          setInputText((prev) => prev + sentence + " ");
+          setInputText((prev) => sentence + " ");
         }
       }
 
@@ -232,13 +232,13 @@
                 const predictions = getPredictionForRegion("left-up");
                 return (
                   <>
-                    <div className="font-poppins text-5xl text-custom-white mb-2">
+                    <div className="text-center font-poppins text-5xl text-custom-white mb-2">
                       {convertHyphenFormat(predictions[0])}
                     </div>
-                    <div className="font-poppins text-3xl text-gray-200">
+                    <div className="text-center font-poppins text-3xl text-gray-200">
                       {predictions[1]}
                     </div>
-                    <div className="font-poppins text-2xl text-gray-400">
+                    <div className="text-center font-poppins text-2xl text-gray-400">
                       {predictions[2]}
                     </div>
                   </>
@@ -257,13 +257,13 @@
                 const predictions = getPredictionForRegion("left-down");
                 return (
                   <>
-                    <div className="font-poppins text-5xl text-custom-white mb-2">
+                    <div className="text-center font-poppins text-5xl text-custom-white mb-2">
                       {convertHyphenFormat(predictions[0])}
                     </div>
-                    <div className="font-poppins text-3xl text-gray-200">
+                    <div className="text-center font-poppins text-3xl text-gray-200">
                       {predictions[1]}
                     </div>
-                    <div className="font-poppins text-2xl text-gray-400">
+                    <div className="text-center font-poppins text-2xl text-gray-400">
                       {predictions[2]}
                     </div>
                   </>
@@ -273,9 +273,6 @@
           </div>
           {/* Mid col */}
           <div >
-          <div className="text-center font-poppins text-custom-white/60 text-lg">
-                Gaze at "Switch Mode" to cycle modes
-              </div>
             <div
               className={`relative rounded-xl border backdrop-blur-md transition-all duration-300 flex flex-col items-center justify-center w-full h-56 gap-100
                   ${
@@ -291,20 +288,22 @@
                 Next Mode: {modes[(modeIndex + 1) % modes.length].toUpperCase()}
               </div>
             </div>
+            <div className="text-center font-poppins text-custom-white/60 text-lg p-8">
+                Gaze at "Switch Mode" to cycle modes
+              </div>
             <div className="col-span-3 flex flex-col items-center justify-center space-y-8">
               {/* Input field */}
               <div className="bg-custom-white/10 backdrop-blur-md rounded-xl p-8 border border-custom-white/20 w-full max-w-3xl">
-                <H3 className="font-poppins text-custom-white mb-4">Text:</H3>
-                <P className="font-poppins text-custom-white text-xl min-h-[3rem]">
+                <H3 className="font-poppins text-custom-white">Text:</H3>
+                <P className="font-poppins text-custom-white text-xl min-h-[3rem] volleybloww">
                   {inputText || "|"}
                 </P>
               </div>
-
-              <SpeechToTextComponent setter={setContextText} />
         
               {/* Control buttons */}
               <div className="flex justify-center gap-8">
-                <button
+              <SpeechToTextComponent setter={setContextText} />
+              <button
                   onClick={() => setInputText("")}
                   className="bg-custom-white/10 backdrop-blur-md font-poppins text-custom-white px-8 py-4 rounded-lg border border-custom-white/20 hover:bg-custom-white/20 transition-all duration-200 flex items-center gap-4"
                 >
@@ -333,13 +332,13 @@
                 const predictions = getPredictionForRegion("right-up");
                 return (
                   <>
-                    <div className="font-poppins text-5xl text-custom-white mb-2">
+                    <div className="text-center font-poppins text-5xl text-custom-white mb-2">
                       {convertHyphenFormat(predictions[0])}
                     </div>
-                    <div className="font-poppins text-3xl text-gray-200">
+                    <div className="text-center font-poppins text-3xl text-gray-200">
                       {predictions[1]}
                     </div>
-                    <div className="font-poppins text-2xl text-gray-400">
+                    <div className="text-center font-poppins text-2xl text-gray-400">
                       {predictions[2]}
                     </div>
                   </>
@@ -358,13 +357,13 @@
               const predictions = getPredictionForRegion("right-down");
               return (
                 <>
-                  <div className="font-poppins text-5xl text-custom-white mb-2">
+                  <div className="text-center font-poppins text-5xl text-custom-white mb-2">
                     {convertHyphenFormat(predictions[0])}
                   </div>
-                  <div className="font-poppins text-3xl text-gray-200">
+                  <div className="text-center font-poppins text-3xl text-gray-200" >
                     {predictions[1]}
                   </div>
-                  <div className="font-poppins text-2xl text-gray-400">
+                  <div className="text-center font-poppins text-2xl text-gray-400">
                     {predictions[2]}
                   </div>
                 </>
