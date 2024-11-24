@@ -1,10 +1,10 @@
 // src/pages/TextInputPage.jsx
 import { useState, useEffect, useCallback } from "react";
-import { Eye } from "lucide-react";
+import { Eye, RefreshCcw } from "lucide-react";
 import { FilmGrain } from "../components/FilmGrain";
 import { useWebGazer } from "../context/WebGazerContext";
 import { useNavigate } from "react-router-dom";
-import { RefreshCcw } from "lucide-react";
+import { H3, P } from '../components/Typography';
 
 const GAZE_THRESHOLD = 1000; // 1 second
 const EYE_CLOSED_THRESHOLD = 1500; // 1.5 seconds

@@ -1,10 +1,20 @@
+/* Move CSS variables to :root for global scope */
+:root {
+  --night: #041008ff;
+  --berkeley-blue: #053061ff;
+  --lapis-lazuli: #00567aff;
+  --dark-spring-green: #417656ff;
+  --white: #fffeffff;
+}
+
+
 #root {
   max-width: 1280px;
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
-  background-color: #000; /* High contrast for background */
-  color: #fff; /* High contrast for text */
+  background-color: var(--night); /* Using CSS variable */
+  color: var(--white); /* Using CSS variable */
 }
 
 .logo {
@@ -17,7 +27,7 @@
 .logo:hover {
   filter: drop-shadow(0 0 2em #646cffaa);
 }
-
+a
 .logo.react:hover {
   filter: drop-shadow(0 0 2em #61dafbaa);
 }
@@ -38,84 +48,111 @@
 }
 
 .card {
-  padding: 3em; /* Increased padding for larger clickable area */
-  border: 2px solid #fff; /* High contrast border */
-  border-radius: 10px; /* Make the cards more visually accessible */
-  background-color: #111; /* High contrast card background */
-  color: #fff; /* High contrast text */
+  padding: 3em;
+  border: 2px solid var(--white);
+  border-radius: 10px;
+  background-color: var(--night);
+  color: var(--white);
 }
 
 .read-the-docs {
-  color: #ffffff; /* High contrast for better visibility */
-  font-size: 1.2rem; /* Larger font for better readability */
+  color: var(--white);
+  font-size: 1.2rem;
 }
 
 /* Typography adjustments for accessibility */
 h1, h2, h3, h4, p, blockquote {
-  color: #ffffff; /* Consistent high contrast color for all headings */
+  color: var(--white);
 }
 
 h1 {
-  font-size: 3rem; /* Larger font size for H1 */
+  font-size: 3rem;
 }
 
 h2 {
-  font-size: 2.5rem; /* Larger font size for H2 */
+  font-size: 2.5rem;
 }
 
 h3 {
-  font-size: 2rem; /* Larger font size for H3 */
+  font-size: 2rem;
 }
 
 h4 {
-  font-size: 1.75rem; /* Larger font size for H4 */
+  font-size: 1.75rem;
 }
 
 p, blockquote {
-  font-size: 1.25rem; /* Increased paragraph font size */
-  line-height: 1.8; /* More spacing for easier reading */
+  font-size: 1.25rem;
+  line-height: 1.8;
 }
 
 button {
-  font-size: 1.5rem; /* Increase button text size for easy reading */
-  padding: 1rem 2rem; /* Increase button padding for better accessibility */
-  background-color: #333; /* High contrast button background */
-  color: #fff; /* High contrast button text */
-  border-radius: 8px; /* Rounded corners for buttons */
+  font-size: 1.5rem;
+  padding: 1rem 2rem;
+  background-color: var(--berkeley-blue);
+  color: var(--white);
+  border-radius: 8px;
   transition: background-color 200ms ease-in-out;
 }
 
 button:hover {
-  background-color: #555; /* Hover effect with higher contrast */
+  background-color: var(--lapis-lazuli);
+}
+
+html {
+  overflow: hidden;
+  height: 100%;
 }
 
 body {
-  font-family: 'Arial', sans-serif; /* Replace with a more readable default system font */
-  background-color: #000; /* Black background for high contrast */
-  color: #fff; /* White text for high contrast */
+  height: 100%;
+  overflow: auto;
+  font-family: 'Arial', sans-serif;
+  background-color: var(--night);
+  color: var(--white);
 }
 
-/* Typography component specific styles for better readability */
+/* Animation for gradient orbs */
+@keyframes blob {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25% { transform: translate(20px, -20px) scale(1.1); }
+  50% { transform: translate(0, 20px) scale(0.9); }
+  75% { transform: translate(-20px, -15px) scale(1.05); }
+}
+
+.animate-blob {
+  animation: blob 7s infinite;
+}
+
+.animation-delay-2000 {
+  animation-delay: 2s;
+}
+
+.animation-delay-4000 {
+  animation-delay: 4s;
+}
+
+/* Typography component specific styles */
 .leading-7 {
-  line-height: 2rem; /* Make the leading bigger for accessibility */
+  line-height: 2rem;
 }
 
 .text-4xl {
-  font-size: 3rem; /* Larger default size for extra-large text */
+  font-size: 3rem;
 }
 
 .text-3xl {
-  font-size: 2.5rem; /* Larger default size for H3 */
+  font-size: 2.5rem;
 }
 
 .text-xl {
-  font-size: 1.75rem; /* Larger default size for extra-large text */
+  font-size: 1.75rem;
 }
 
 .text-lg {
-  font-size: 1.5rem; /* Larger default size for large text */
+  font-size: 1.5rem;
 }
 
 .text-muted-foreground {
-  color: #cccccc; /* Muted color for background information */
+  color: rgba(255, 255, 255, 0.8);
 }

@@ -65,6 +65,7 @@ export const SetupPage = () => {
       }
     };
   }, [currentStep, initializeWebGazer, positionVideo]);
+
   const handleCalibrationClick = (e) => {
     if (
       !webgazerInitialized ||
@@ -97,36 +98,39 @@ export const SetupPage = () => {
   };
 
   const handleComplete = () => {
-    // webgazer.saveData(); // Save calibration data
     // Mark setup as complete
     localStorage.setItem('setupComplete', 'true');
 
-    navigate("/text"); // Use navigate instead of window.location
+    navigate("/speak"); // Use navigate instead of window.location
   };
 
   return (
     <div className="relative min-h-screen overflow-hidden">
-      {/* Background elements */}
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-200 via-purple-300 to-pink-200 opacity-70" />
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-400 rounded-full mix-blend-multiply filter blur-3xl animate-blob opacity-30" />
-      <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-pink-400 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-2000 opacity-30" />
+      {/* Enhanced gradient background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-berkeley via-lapis to-spring opacity-90" />
+
+      {/* Floating gradient orbs for depth */}
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-spring rounded-full mix-blend-multiply filter blur-3xl animate-blob opacity-50" />
+      <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-lapis rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-2000 opacity-50" />
+      <div className="absolute bottom-1/4 left-1/3 w-96 h-96 bg-berkeley rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-4000 opacity-50" />
+
       <FilmGrain />
 
       {currentStep === 0 ? (
         <div className="relative flex flex-col items-center justify-center min-h-screen p-4">
-          <div className="bg-white/10 backdrop-blur-md p-4 rounded-full shadow-xl border border-white/20 mb-6">
-            <Eye className="h-16 w-16 text-white" />
+          <div className="bg-custom-white/10 backdrop-blur-md p-4 rounded-full shadow-xl border border-custom-white/40 mb-6">
+            <Eye className="h-16 w-16 text-custom-white" />
           </div>
-          <h1 className="font-serif text-4xl mb-4 text-white drop-shadow-lg">
+          <h1 className="font-serif text-6xl mb-8 text-custom-white drop-shadow-lg">
             Eye Tracking Setup
           </h1>
-          <p className="text-lg text-white/80 mb-8 text-center max-w-md">
+          <p className="text-4xl text-custom-white/80 mb-10 text-center max-w-md leading-relaxed">
             We'll need to calibrate your eye tracking. Follow the pulsing
             circles and click each point when prompted.
           </p>
           <button
             onClick={() => setCurrentStep(1)}
-            className="bg-white/10 backdrop-blur-md text-white font-semibold px-8 py-4 rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200 hover:scale-105 border border-white/20 hover:border-white/30 hover:bg-white/20"
+            className="bg-custom-white/10 backdrop-blur-md text-custom-white font-bold px-12 py-6 rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200 hover:scale-105 border border-custom-white/40 hover:border-custom-white/60 hover:bg-custom-white/20"
           >
             Begin Calibration
           </button>
@@ -142,14 +146,14 @@ export const SetupPage = () => {
             >
               <div className="relative">
                 {index === currentPoint && (
-                  <div className="absolute inset-0 bg-white/30 backdrop-blur-md rounded-full animate-ping" />
+                  <div className="absolute inset-0 bg-custom-white/30 backdrop-blur-md rounded-full animate-ping" />
                 )}
                 <div
                   className={`relative backdrop-blur-md w-6 h-6 rounded-full border shadow-lg transition-transform cursor-pointer
                     ${
                       index === currentPoint
-                        ? "bg-white/40 border-white/60 hover:scale-110"
-                        : "bg-white/10 border-white/20"
+                        ? "bg-custom-white/40 border-custom-white/60 hover:scale-110"
+                        : "bg-custom-white/10 border-custom-white/20"
                     }`}
                 />
               </div>
@@ -158,20 +162,20 @@ export const SetupPage = () => {
 
           {/* Instructions - Positioned below center point */}
           <div className="absolute top-[60%] left-1/2 transform -translate-x-1/2 text-center not-calibration-point">
-            <h2 className="font-serif text-2xl mb-2 text-white drop-shadow-lg not-calibration-point">
+            <h2 className="font-serif text-3xl mb-4 text-custom-white drop-shadow-lg not-calibration-point">
               {currentPoint < CALIBRATION_SEQUENCE.length
                 ? `Look at and click the pulsing dot (${currentPoint + 1}/${
                     CALIBRATION_SEQUENCE.length
                   })`
                 : "Calibration Complete!"}
             </h2>
-            <p className="text-white/80 mb-4 not-calibration-point">
+            <p className="text-custom-white/90 mb-6 not-calibration-point">
               {CALIBRATION_SEQUENCE[currentPoint]?.label || ""}
             </p>
             {currentPoint >= CALIBRATION_SEQUENCE.length - 1 && (
               <button
                 onClick={handleComplete}
-                className="bg-white/10 backdrop-blur-md text-white px-6 py-2 rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200 border border-white/20 hover:border-white/30 hover:bg-white/20 not-calibration-point"
+                className="bg-custom-white/10 backdrop-blur-md text-custom-white px-8 py-4 rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200 border border-custom-white/40 hover:border-custom-white/60 hover:bg-custom-white/20 not-calibration-point"
               >
                 Complete Setup
               </button>
@@ -180,8 +184,8 @@ export const SetupPage = () => {
 
           {/* Feedback overlay */}
           {showFeedback && (
-            <div className="fixed top-4 right-4 bg-white/10 backdrop-blur-md px-4 py-2 rounded-lg border border-white/20 not-calibration-point">
-              <p className="text-white not-calibration-point">
+            <div className="fixed top-4 right-4 bg-custom-white/10 backdrop-blur-md px-4 py-2 rounded-lg border border-custom-white/40 not-calibration-point">
+              <p className="text-custom-white not-calibration-point">
                 Point Calibrated!
               </p>
             </div>
