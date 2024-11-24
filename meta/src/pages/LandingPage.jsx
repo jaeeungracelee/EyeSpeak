@@ -1,6 +1,5 @@
 import { Eye } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { FilmGrain } from '../components/FilmGrain';
 import { useEffect, useState } from 'react';
 import { H1, H2, H3, P } from '../components/Typography';
 
@@ -22,8 +21,6 @@ export const LandingPage = () => {
       <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-lapis rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-2000 opacity-50" />
       <div className="absolute bottom-1/4 left-1/3 w-96 h-96 bg-berkeley rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-4000 opacity-50" />
 
-      <FilmGrain />
-
       <div className="relative max-w-6xl mx-auto px-4 py-16">
         <header className="text-center mb-16">
           <div className="flex justify-center mb-6">
@@ -38,7 +35,7 @@ export const LandingPage = () => {
             Communicate effortlessly through the power of eye tracking. Type and express yourself just by looking at the screen.
           </P>
           <Link 
-            to={setupComplete ? "/text" : "/setup"}
+            to={setupComplete ? "/speak" : "/calibrate"}
             className="inline-block bg-custom-white/10 backdrop-blur-md text-custom-white text-3xl font-bold px-12 py-6 rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200 hover:scale-105 border border-custom-white/40 hover:border-custom-white/60 hover:bg-custom-white/20"
           >
             {setupComplete ? "Continue to Text Input" : "Get Started"}

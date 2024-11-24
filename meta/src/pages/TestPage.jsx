@@ -1,7 +1,6 @@
 // src/pages/TestPage.jsx
 import { useState, useEffect, useRef } from 'react';
 import { Eye, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, Camera, Loader } from 'lucide-react';
-import { FilmGrain } from '../components/FilmGrain';
 
 const CALIBRATION_SEQUENCE = [
   { direction: 'center', label: 'Center' },
@@ -254,7 +253,6 @@ const DirectionIndicator = ({ direction }) => {
       <div className="absolute inset-0 bg-gradient-to-br from-blue-200 via-purple-300 to-pink-200 opacity-70" />
       <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-400 rounded-full mix-blend-multiply filter blur-3xl animate-blob opacity-30" />
       <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-pink-400 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-2000 opacity-30" />
-      <FilmGrain />
 
       <div className="relative flex flex-col items-center justify-center min-h-screen p-4">
         {/* Video preview */}

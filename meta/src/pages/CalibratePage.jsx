@@ -3,7 +3,6 @@ import { useWebGazer } from "../context/WebGazerContext";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { Eye } from "lucide-react";
-import { FilmGrain } from "../components/FilmGrain";
 
 // Define calibration sequence
 const CALIBRATION_SEQUENCE = [
@@ -113,8 +112,6 @@ export const SetupPage = () => {
       <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-spring rounded-full mix-blend-multiply filter blur-3xl animate-blob opacity-50" />
       <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-lapis rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-2000 opacity-50" />
       <div className="absolute bottom-1/4 left-1/3 w-96 h-96 bg-berkeley rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-4000 opacity-50" />
-
-      <FilmGrain />
 
       {currentStep === 0 ? (
         <div className="relative flex flex-col items-center justify-center min-h-screen p-4">

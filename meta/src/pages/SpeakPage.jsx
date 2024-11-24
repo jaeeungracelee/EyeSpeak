@@ -1,7 +1,6 @@
 // src/pages/TextInputPage.jsx
 import { useState, useEffect, useCallback } from "react";
 import { Eye, RefreshCcw } from "lucide-react";
-import { FilmGrain } from "../components/FilmGrain";
 import { useWebGazer } from "../context/WebGazerContext";
 import { useNavigate } from "react-router-dom";
 import { H3, P } from '../components/Typography';
@@ -233,7 +232,7 @@ const TextInputPage = () => {
       <div className="absolute inset-0 bg-gradient-to-br from-blue-200 via-purple-300 to-pink-200 opacity-70" />
       <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-400 rounded-full mix-blend-multiply filter blur-3xl animate-blob opacity-30" />
       <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-pink-400 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-2000 opacity-30" />
-      <FilmGrain />
+
 
       {/* Letter regions */}
       <div className="relative w-full h-screen grid grid-cols-3 grid-rows-3 gap-8 p-8">

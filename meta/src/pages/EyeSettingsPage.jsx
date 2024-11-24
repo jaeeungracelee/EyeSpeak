@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { Eye, ArrowRight } from 'lucide-react';
-import { FilmGrain } from '../components/FilmGrain';
 import { H1, H3, P } from '../components/Typography';
 
 const GazeDirectionTest = ({ currentGaze, loss }) => (
@@ -119,8 +118,6 @@ export const EyeSettingsPage = () => {
       <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-spring rounded-full mix-blend-multiply filter blur-3xl animate-blob opacity-50" />
       <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-lapis rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-2000 opacity-50" />
       <div className="absolute bottom-1/4 left-1/3 w-96 h-96 bg-berkeley rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-4000 opacity-50" />
-
-      <FilmGrain />
 
       <nav className="relative bg-custom-white/10 backdrop-blur-md border-b border-custom-white/40">
         <div className="max-w-7xl mx-auto px-4 py-6 flex items-center justify-between">
