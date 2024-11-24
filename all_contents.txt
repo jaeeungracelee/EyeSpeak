@@ -1,0 +1,1317 @@
+// Contents of /Users/danielsu/Documents/GitHub/metallama/meta/tailwind.config.js
+// tailwind.config.js
+/** @type {import('tailwindcss').Config} */
+export default {
+    content: [
+      "./index.html",
+      "./src/**/*.{js,ts,jsx,tsx}",
+    ],
+    theme: {
+      extend: {},
+    },
+    plugins: [],
+  }
+  
+
+
+// Contents of /Users/danielsu/Documents/GitHub/metallama/meta/vite.config.js
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+
+// https://vite.dev/config/
+export default defineConfig({
+  plugins: [react()],
+})
+
+
+// Contents of /Users/danielsu/Documents/GitHub/metallama/meta/eslint.config.js
+import js from '@eslint/js'
+import globals from 'globals'
+import react from 'eslint-plugin-react'
+import reactHooks from 'eslint-plugin-react-hooks'
+import reactRefresh from 'eslint-plugin-react-refresh'
+
+export default [
+  { ignores: ['dist'] },
+  {
+    files: ['**/*.{js,jsx}'],
+    languageOptions: {
+      ecmaVersion: 2020,
+      globals: globals.browser,
+      parserOptions: {
+        ecmaVersion: 'latest',
+        ecmaFeatures: { jsx: true },
+        sourceType: 'module',
+      },
+    },
+    settings: { react: { version: '18.3' } },
+    plugins: {
+      react,
+      'react-hooks': reactHooks,
+      'react-refresh': reactRefresh,
+    },
+    rules: {
+      ...js.configs.recommended.rules,
+      ...react.configs.recommended.rules,
+      ...react.configs['jsx-runtime'].rules,
+      ...reactHooks.configs.recommended.rules,
+      'react/jsx-no-target-blank': 'off',
+      'react-refresh/only-export-components': [
+        'warn',
+        { allowConstantExport: true },
+      ],
+    },
+  },
+]
+
+
+// Contents of /Users/danielsu/Documents/GitHub/metallama/meta/postcss.config.js
+  // postcss.config.js
+  export default {
+    plugins: {
+      tailwindcss: {},
+      autoprefixer: {},
+    },
+  }
+
+// Contents of /Users/danielsu/Documents/GitHub/metallama/meta/src/App.css
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+.card {
+  padding: 2em;
+}
+
+.read-the-docs {
+  color: #888;
+}
+
+
+// Contents of /Users/danielsu/Documents/GitHub/metallama/meta/src/index.css
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom animations */
+@keyframes blob {
+  0% {
+    transform: translate(0px, 0px) scale(1);
+  }
+  33% {
+    transform: translate(30px, -50px) scale(1.1);
+  }
+  66% {
+    transform: translate(-20px, 20px) scale(0.9);
+  }
+  100% {
+    transform: translate(0px, 0px) scale(1);
+  }
+}
+
+.animate-blob {
+  animation: blob 7s infinite;
+}
+
+.animation-delay-2000 {
+  animation-delay: 2s;
+}
+
+.animation-delay-4000 {
+  animation-delay: 4s;
+}
+
+/* Add a custom serif font (optional) */
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&display=swap');
+
+.font-serif {
+  font-family: 'Fraunces', serif;
+}
+
+
+// Contents of /Users/danielsu/Documents/GitHub/metallama/meta/src/main.jsx
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import './index.css'
+import App from './App'
+
+createRoot(document.getElementById('root')).render(
+  <StrictMode>
+    <App />
+  </StrictMode>,
+)
+
+
+// Contents of /Users/danielsu/Documents/GitHub/metallama/meta/src/App.jsx
+// src/App.jsx
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { LandingPage } from "./pages/LandingPage";
+import { SetupPage } from "./pages/SetupPage";
+import { WebGazerProvider } from "./context/WebGazerContext";
+import TestPage from "./pages/TestPage";
+import { TextInputPage } from "./pages/TextInputPage";
+
+const App = () => {
+  return (
+    <WebGazerProvider>
+      <Router>
+        <Routes>
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/setup" element={<SetupPage />} />
+          <Route path="/test" element={<TestPage />} />
+          <Route path="/text" element={<TextInputPage />} />
+        </Routes>
+      </Router>
+    </WebGazerProvider>
+  );
+};
+
+export default App;
+
+
+// Contents of /Users/danielsu/Documents/GitHub/metallama/meta/src/context/WebGazerContext.jsx
+// src/context/WebGazerContext.jsx
+import { createContext, useContext, useState } from "react";
+
+const WebGazerContext = createContext(null);
+
+export const WebGazerProvider = ({ children }) => {
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  const initializeWebGazer = async () => {
+    if (!isInitialized) {
+      try {
+        await window.webgazer
+          .setRegression("ridge")
+          .setTracker("TFFacemesh")
+          .begin();
+
+        // Remove the line that shows the video
+        // window.webgazer.showVideo(true);
+
+        // Keep other configurations
+        window.webgazer.showFaceOverlay(true);
+        window.webgazer.showPredictionPoints(true);
+
+        setIsInitialized(true);
+        return true;
+      } catch (error) {
+        console.error("Failed to initialize webgazer:", error);
+        return false;
+      }
+    }
+    return true;
+  };
+
+  const positionVideo = (top = "35%") => {
+    const videoElement = document.getElementById("webgazerVideoContainer");
+    if (videoElement) {
+      videoElement.style.position = "absolute";
+      videoElement.style.top = "30%";
+      videoElement.style.left = "50%";
+      videoElement.style.transform = "translate(-50%, -50%)";
+      videoElement.style.zIndex = "1000";
+      videoElement.style.backgroundColor = "transparent";
+    }
+  };
+
+  return (
+    <WebGazerContext.Provider
+      value={{
+        isInitialized,
+        initializeWebGazer,
+        positionVideo,
+      }}
+    >
+      {children}
+    </WebGazerContext.Provider>
+  );
+};
+
+export const useWebGazer = () => {
+  const context = useContext(WebGazerContext);
+  if (!context) {
+    throw new Error("useWebGazer must be used within a WebGazerProvider");
+  }
+  return context;
+};
+
+
+// Contents of /Users/danielsu/Documents/GitHub/metallama/meta/src/components/FilmGrain.jsx
+export const FilmGrain = () => (
+    <div 
+      className="fixed inset-0 pointer-events-none opacity-[0.15]"
+      style={{
+        backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+      }}
+    />
+  );
+  
+
+// Contents of /Users/danielsu/Documents/GitHub/metallama/meta/src/pages/SetupPage.jsx
+// src/pages/SetupPage.jsx
+import { useWebGazer } from "../context/WebGazerContext";
+import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Eye } from "lucide-react";
+import { FilmGrain } from "../components/FilmGrain";
+
+// Define calibration sequence
+const CALIBRATION_SEQUENCE = [
+  { x: "10%", y: "10%", label: "Top Left" },
+  { x: "90%", y: "90%", label: "Bottom Right" },
+  { x: "90%", y: "10%", label: "Top Right" },
+  { x: "10%", y: "90%", label: "Bottom Left" },
+  { x: "50%", y: "10%", label: "Top Center" },
+  { x: "50%", y: "90%", label: "Bottom Center" },
+  { x: "10%", y: "50%", label: "Middle Left" },
+  { x: "90%", y: "50%", label: "Middle Right" },
+  { x: "50%", y: "50%", label: "Center" },
+  { x: "10%", y: "10%", label: "Top Left" },
+  { x: "90%", y: "90%", label: "Bottom Right" },
+  { x: "90%", y: "10%", label: "Top Right" },
+  { x: "10%", y: "90%", label: "Bottom Left" },
+  { x: "50%", y: "10%", label: "Top Center" },
+  { x: "50%", y: "90%", label: "Bottom Center" },
+  { x: "10%", y: "50%", label: "Middle Left" },
+  { x: "90%", y: "50%", label: "Middle Right" },
+  { x: "50%", y: "50%", label: "Center" },
+  { x: "10%", y: "10%", label: "Top Left" },
+  { x: "90%", y: "90%", label: "Bottom Right" },
+  { x: "90%", y: "10%", label: "Top Right" },
+  { x: "10%", y: "90%", label: "Bottom Left" },
+  { x: "50%", y: "10%", label: "Top Center" },
+  { x: "50%", y: "90%", label: "Bottom Center" },
+  { x: "10%", y: "50%", label: "Middle Left" },
+  { x: "90%", y: "50%", label: "Middle Right" },
+  { x: "50%", y: "50%", label: "Center" },
+];
+
+export const SetupPage = () => {
+  const { initializeWebGazer, positionVideo } = useWebGazer();
+  const navigate = useNavigate();
+  const [currentStep, setCurrentStep] = useState(0);
+  const [webgazerInitialized, setWebgazerInitialized] = useState(false);
+  const [currentPoint, setCurrentPoint] = useState(0);
+  const [showFeedback, setShowFeedback] = useState(false);
+
+  useEffect(() => {
+    const init = async () => {
+      if (currentStep > 0) {
+        const success = await initializeWebGazer();
+        if (success) {
+          setWebgazerInitialized(true);
+          window.webgazer.showVideo(true); // Show the video feed
+          positionVideo();
+        }
+      }
+    };
+
+    init();
+
+    // Hide the video feed when the component unmounts
+    return () => {
+      if (window.webgazer) {
+        window.webgazer.showVideo(false);
+      }
+    };
+  }, [currentStep, initializeWebGazer, positionVideo]);
+  const handleCalibrationClick = (e) => {
+    if (
+      !webgazerInitialized ||
+      e.target.className.includes("not-calibration-point")
+    )
+      return;
+
+    const clickedPoint = {
+      x: (e.clientX / window.innerWidth) * 100,
+      y: (e.clientY / window.innerHeight) * 100,
+    };
+
+    const targetPoint = CALIBRATION_SEQUENCE[currentPoint];
+    const targetX = parseInt(targetPoint.x);
+    const targetY = parseInt(targetPoint.y);
+
+    // Check if click is close to the current target point
+    if (
+      Math.abs(clickedPoint.x - targetX) < 5 &&
+      Math.abs(clickedPoint.y - targetY) < 5
+    ) {
+      window.webgazer.recordScreenPosition(e.clientX, e.clientY, "click");
+      setShowFeedback(true);
+      setTimeout(() => setShowFeedback(false), 500);
+
+      if (currentPoint < CALIBRATION_SEQUENCE.length - 1) {
+        setCurrentPoint((prev) => prev + 1);
+      }
+    }
+  };
+
+  const handleComplete = () => {
+    // webgazer.saveData(); // Save calibration data
+    // Mark setup as complete
+    localStorage.setItem('setupComplete', 'true');
+
+    navigate("/text"); // Use navigate instead of window.location
+  };
+
+  return (
+    <div className="relative min-h-screen overflow-hidden">
+      {/* Background elements */}
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-200 via-purple-300 to-pink-200 opacity-70" />
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-400 rounded-full mix-blend-multiply filter blur-3xl animate-blob opacity-30" />
+      <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-pink-400 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-2000 opacity-30" />
+      <FilmGrain />
+
+      {currentStep === 0 ? (
+        <div className="relative flex flex-col items-center justify-center min-h-screen p-4">
+          <div className="bg-white/10 backdrop-blur-md p-4 rounded-full shadow-xl border border-white/20 mb-6">
+            <Eye className="h-16 w-16 text-white" />
+          </div>
+          <h1 className="font-serif text-4xl mb-4 text-white drop-shadow-lg">
+            Eye Tracking Setup
+          </h1>
+          <p className="text-lg text-white/80 mb-8 text-center max-w-md">
+            We'll need to calibrate your eye tracking. Follow the pulsing
+            circles and click each point when prompted.
+          </p>
+          <button
+            onClick={() => setCurrentStep(1)}
+            className="bg-white/10 backdrop-blur-md text-white font-semibold px-8 py-4 rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200 hover:scale-105 border border-white/20 hover:border-white/30 hover:bg-white/20"
+          >
+            Begin Calibration
+          </button>
+        </div>
+      ) : (
+        <div className="relative min-h-screen" onClick={handleCalibrationClick}>
+          {/* Calibration points */}
+          {CALIBRATION_SEQUENCE.map((point, index) => (
+            <div
+              key={index}
+              className="absolute w-6 h-6 transform -translate-x-1/2 -translate-y-1/2"
+              style={{ left: point.x, top: point.y }}
+            >
+              <div className="relative">
+                {index === currentPoint && (
+                  <div className="absolute inset-0 bg-white/30 backdrop-blur-md rounded-full animate-ping" />
+                )}
+                <div
+                  className={`relative backdrop-blur-md w-6 h-6 rounded-full border shadow-lg transition-transform cursor-pointer
+                    ${
+                      index === currentPoint
+                        ? "bg-white/40 border-white/60 hover:scale-110"
+                        : "bg-white/10 border-white/20"
+                    }`}
+                />
+              </div>
+            </div>
+          ))}
+
+          {/* Instructions - Positioned below center point */}
+          <div className="absolute top-[60%] left-1/2 transform -translate-x-1/2 text-center not-calibration-point">
+            <h2 className="font-serif text-2xl mb-2 text-white drop-shadow-lg not-calibration-point">
+              {currentPoint < CALIBRATION_SEQUENCE.length
+                ? `Look at and click the pulsing dot (${currentPoint + 1}/${
+                    CALIBRATION_SEQUENCE.length
+                  })`
+                : "Calibration Complete!"}
+            </h2>
+            <p className="text-white/80 mb-4 not-calibration-point">
+              {CALIBRATION_SEQUENCE[currentPoint]?.label || ""}
+            </p>
+            {currentPoint >= CALIBRATION_SEQUENCE.length - 1 && (
+              <button
+                onClick={handleComplete}
+                className="bg-white/10 backdrop-blur-md text-white px-6 py-2 rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200 border border-white/20 hover:border-white/30 hover:bg-white/20 not-calibration-point"
+              >
+                Complete Setup
+              </button>
+            )}
+          </div>
+
+          {/* Feedback overlay */}
+          {showFeedback && (
+            <div className="fixed top-4 right-4 bg-white/10 backdrop-blur-md px-4 py-2 rounded-lg border border-white/20 not-calibration-point">
+              <p className="text-white not-calibration-point">
+                Point Calibrated!
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
+
+// Contents of /Users/danielsu/Documents/GitHub/metallama/meta/src/pages/TestPage.jsx
+// src/pages/TestPage.jsx
+import { useState, useEffect, useRef } from 'react';
+import { Eye, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, Camera, Loader } from 'lucide-react';
+import { FilmGrain } from '../components/FilmGrain';
+
+const CALIBRATION_SEQUENCE = [
+  { direction: 'center', label: 'Center' },
+  { direction: 'left', label: 'Left' },
+  { direction: 'right', label: 'Right' },
+  { direction: 'up', label: 'Up' },
+  { direction: 'up-left', label: 'Up-Left' },
+  { direction: 'up-right', label: 'Up-Right' },
+];
+
+const DirectionIndicator = ({ direction }) => {
+    const indicators = [
+      { position: 'up-left', deg: -45 },
+      { position: 'up', deg: 0 },
+      { position: 'up-right', deg: 45 },
+      { position: 'left', deg: -90 },
+      { position: 'center', deg: 0 },
+      { position: 'right', deg: 90 }
+    ];
+  
+    return (
+      <div className="relative w-52 h-52">
+        {/* Direction grid */}
+        <div className="absolute inset-0 grid grid-cols-3 grid-rows-3 gap-2">
+          {indicators.map(({ position }) => (
+            <div
+              key={position}
+              className={`rounded-lg border-2 ${
+                direction?.direction === position
+                  ? 'border-white bg-white/20 shadow-lg'
+                  : 'border-white/20'
+              } ${position === 'center' ? 'col-start-2 row-start-2' : ''}
+              ${position === 'up' ? 'col-start-2 row-start-1' : ''}
+              ${position === 'up-left' ? 'col-start-1 row-start-1' : ''}
+              ${position === 'up-right' ? 'col-start-3 row-start-1' : ''}
+              ${position === 'left' ? 'col-start-1 row-start-2' : ''}
+              ${position === 'right' ? 'col-start-3 row-start-2' : ''}`}
+            >
+              {direction?.direction === position && (
+                <div className="h-full flex items-center justify-center">
+                  <Eye className="text-white h-6 w-6 animate-pulse" />
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+  
+        {/* Direction label */}
+        <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 text-white text-lg font-medium">
+          {direction ? direction.direction : 'Not detected'}
+        </div>
+      </div>
+    );
+  };
+
+ const TestPage = () => {
+  const [isCalibrating, setIsCalibrating] = useState(true);
+  const [currentCalibrationStep, setCurrentCalibrationStep] = useState(0);
+  const [calibrationProgress, setCalibrationProgress] = useState({});
+  const [direction, setDirection] = useState(null);
+  const [isActive, setIsActive] = useState(false);
+  const [error, setError] = useState(null);
+  const videoRef = useRef(null);
+  const streamRef = useRef(null);
+  const trackingIntervalRef = useRef(null);
+  const [sensitivity, setSensitivity] = useState(0.015); // Default sensitivity
+
+  // Add sensitivity adjustment to the fetch calls
+  const detectDirection = async (blob) => {
+    const formData = new FormData();
+    formData.append('file', blob);
+    formData.append('sensitivity', sensitivity.toString());
+
+    const response = await fetch('http://localhost:8000/detect', {
+      method: 'POST',
+      body: formData,
+    });
+
+    return response.json();
+  };
+  
+  useEffect(() => {
+    startCamera();
+    return () => {
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+      }
+      if (trackingIntervalRef.current) {
+        clearInterval(trackingIntervalRef.current);
+      }
+    };
+  }, []);
+
+  const startCamera = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      videoRef.current.srcObject = stream;
+      streamRef.current = stream;
+      setIsActive(true);
+    } catch (err) {
+      setError("Error accessing camera: " + err.message);
+    }
+  };
+
+  const captureFrame = () => {
+    if (!videoRef.current) return null;
+    
+    const canvas = document.createElement('canvas');
+    canvas.width = videoRef.current.videoWidth;
+    canvas.height = videoRef.current.videoHeight;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(videoRef.current, 0, 0);
+    return new Promise(resolve => {
+      canvas.toBlob(resolve, 'image/jpeg');
+    });
+  };
+
+  const startTracking = () => {
+    // Clear any existing interval
+    if (trackingIntervalRef.current) {
+      clearInterval(trackingIntervalRef.current);
+    }
+  
+    // Start new tracking interval
+    trackingIntervalRef.current = setInterval(async () => {
+      try {
+        const blob = await captureFrame();
+        if (!blob) return;
+  
+        const data = await detectDirection(blob);  // Use the detectDirection function
+        if (data.error) {
+          setError(data.error);
+        } else {
+          setDirection(data);
+          setError(null);
+        }
+      } catch (err) {
+        setError("Detection error: " + err.message);
+      }
+    }, 100);
+  };
+
+  const calibrateDirection = async () => {
+    const currentDirection = CALIBRATION_SEQUENCE[currentCalibrationStep].direction;
+    
+    try {
+      // Capture left eye
+      const leftBlob = await captureFrame();
+      if (!leftBlob) {
+        setError("Failed to capture frame");
+        return;
+      }
+  
+      const leftFormData = new FormData();
+      leftFormData.append('file', leftBlob);
+      leftFormData.append('direction', currentDirection);
+      leftFormData.append('is_left', 'true');
+      
+      // Capture right eye
+      const rightBlob = await captureFrame();
+      if (!rightBlob) {
+        setError("Failed to capture frame");
+        return;
+      }
+  
+      const rightFormData = new FormData();
+      rightFormData.append('file', rightBlob);
+      rightFormData.append('direction', currentDirection);
+      rightFormData.append('is_left', 'false');
+      
+      // Add loading state
+      setError("Calibrating...");
+      
+      const responses = await Promise.all([
+        fetch('http://localhost:8000/calibrate', { 
+          method: 'POST', 
+          body: leftFormData 
+        }).then(res => res.json()),
+        fetch('http://localhost:8000/calibrate', { 
+          method: 'POST', 
+          body: rightFormData 
+        }).then(res => res.json())
+      ]);
+  
+      // Check if both calibrations were successful
+      if (responses[0].status === 'success' && responses[1].status === 'success') {
+        setCalibrationProgress(prev => ({
+          ...prev,
+          [currentDirection]: true
+        }));
+  
+        if (currentCalibrationStep < CALIBRATION_SEQUENCE.length - 1) {
+          setCurrentCalibrationStep(prev => prev + 1);
+        } else {
+          setIsCalibrating(false);
+          startTracking();
+        }
+        setError(null);
+      } else {
+        setError("Calibration failed. Please try again.");
+      }
+    } catch (err) {
+      setError("Calibration error: " + err.message);
+    }
+  };
+  
+
+  const handleRecalibrate = () => {
+    // Stop tracking
+    if (trackingIntervalRef.current) {
+      clearInterval(trackingIntervalRef.current);
+    }
+    // Reset calibration state
+    setIsCalibrating(true);
+    setCurrentCalibrationStep(0);
+    setCalibrationProgress({});
+    setDirection(null);
+  };
+
+  const getDirectionIcon = () => {
+    if (!direction) return <Eye className="h-12 w-12 text-white" />;
+    
+    switch (direction.direction) {
+      case 'up': return <ArrowUp className="h-12 w-12 text-white" />;
+      case 'up-left': return (
+        <div className="relative">
+          <ArrowUp className="h-12 w-12 text-white" />
+          <ArrowLeft className="h-12 w-12 text-white absolute top-0 left-0 opacity-50" />
+        </div>
+      );
+      case 'up-right': return (
+        <div className="relative">
+          <ArrowUp className="h-12 w-12 text-white" />
+          <ArrowRight className="h-12 w-12 text-white absolute top-0 left-0 opacity-50" />
+        </div>
+      );
+      case 'left': return <ArrowLeft className="h-12 w-12 text-white" />;
+      case 'right': return <ArrowRight className="h-12 w-12 text-white" />;
+      default: return <Eye className="h-12 w-12 text-white" />;
+    }
+  };
+
+  useEffect(() => {
+    startCamera();
+  }, []);
+
+  return (
+    <div className="relative min-h-screen overflow-hidden">
+      {/* Background elements */}
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-200 via-purple-300 to-pink-200 opacity-70" />
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-400 rounded-full mix-blend-multiply filter blur-3xl animate-blob opacity-30" />
+      <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-pink-400 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-2000 opacity-30" />
+      <FilmGrain />
+
+      <div className="relative flex flex-col items-center justify-center min-h-screen p-4">
+        {/* Video preview */}
+        <video
+          ref={videoRef}
+          autoPlay
+          playsInline
+          className="w-64 h-48 bg-black/20 backdrop-blur-md rounded-lg mb-8"
+          style={{ transform: 'scaleX(-1)' }}
+        />
+
+        {isCalibrating ? (
+          <div className="bg-white/10 backdrop-blur-md p-8 rounded-2xl shadow-xl border border-white/20 mb-8">
+            <h2 className="text-white text-xl mb-4">Calibration</h2>
+            <p className="text-white/80 mb-4">
+              Look {CALIBRATION_SEQUENCE[currentCalibrationStep].label} and click the button
+            </p>
+            <div className="flex flex-wrap gap-2 mb-4">
+              {CALIBRATION_SEQUENCE.map((step, index) => (
+                <div
+                  key={step.direction}
+                  className={`w-3 h-3 rounded-full ${
+                    calibrationProgress[step.direction]
+                      ? 'bg-white'
+                      : index === currentCalibrationStep
+                      ? 'bg-white/50 animate-pulse'
+                      : 'bg-white/20'
+                  }`}
+                />
+              ))}
+            </div>
+            <button
+              onClick={calibrateDirection}
+              className="bg-white/10 backdrop-blur-md text-white font-semibold px-6 py-3 rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200 hover:scale-105 border border-white/20 hover:border-white/30 hover:bg-white/20"
+            >
+              Capture {CALIBRATION_SEQUENCE[currentCalibrationStep].label}
+            </button>
+          </div>
+        ) : (
+            <>
+            {/* Enhanced direction indicator */}
+            <div className="bg-white/10 backdrop-blur-md p-8 rounded-2xl shadow-xl border border-white/20 mb-8">
+              <div className="flex flex-col items-center gap-6">
+                <DirectionIndicator direction={direction} />
+                
+                {direction && (
+                  <div className="w-full space-y-4">
+                    {/* Confidence bar */}
+                    <div>
+                      <div className="flex justify-between text-white/80 text-sm mb-1">
+                        <span>Confidence</span>
+                        <span>{Math.round(direction.confidence * 100)}%</span>
+                      </div>
+                      <div className="w-full bg-white/10 rounded-full h-2">
+                        <div 
+                          className="bg-white/30 h-2 rounded-full transition-all duration-300"
+                          style={{ width: `${direction.confidence * 100}%` }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Sensitivity slider */}
+                    <div>
+                      <div className="flex justify-between text-white/80 text-sm mb-1">
+                        <span>Sensitivity</span>
+                        <span>{(sensitivity * 1000).toFixed(1)}</span>
+                      </div>
+                      <input
+                        type="range"
+                        min="0.005"
+                        max="0.025"
+                        step="0.001"
+                        value={sensitivity}
+                        onChange={(e) => setSensitivity(parseFloat(e.target.value))}
+                        className="w-full h-2 bg-white/10 rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Controls */}
+            <div className="flex gap-4">
+              <button
+                onClick={handleRecalibrate}
+                className="bg-white/10 backdrop-blur-md text-white font-semibold px-6 py-3 rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200 hover:scale-105 border border-white/20 hover:border-white/30 hover:bg-white/20"
+              >
+                Recalibrate
+              </button>
+            </div>
+          </>
+        )}
+
+        {/* Error message */}
+        {error && (
+          <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-red-500/10 backdrop-blur-md px-4 py-2 rounded-lg border border-red-500/20">
+            <p className="text-white/80 text-sm">{error}</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default TestPage;
+
+
+// Contents of /Users/danielsu/Documents/GitHub/metallama/meta/src/pages/EyeSettingsPage.jsx
+// src/pages/EyeSettingsPage.jsx
+import { useState, useEffect } from 'react';
+import { Eye, Settings, Volume2, AlertCircle, ArrowRight, BarChart2 } from 'lucide-react';
+import { FilmGrain } from '../components/FilmGrain';
+
+const GazeDirectionTest = ({ currentGaze, loss }) => (
+  <div className="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/20">
+    <h3 className="text-white font-serif text-xl mb-4">Current Gaze Detection</h3>
+    <div className="grid grid-cols-2 gap-4">
+      <div className="flex items-center gap-2">
+        <div className="w-3 h-3 rounded-full bg-green-400" />
+        <span className="text-white">Gaze Type: {currentGaze}</span>
+      </div>
+      <div className="flex items-center gap-2">
+        <div className={`w-3 h-3 rounded-full ${loss < 0.02 ? 'bg-green-400' : 'bg-yellow-400'}`} />
+        <span className="text-white">Loss: {loss.toFixed(3)}</span>
+      </div>
+    </div>
+  </div>
+);
+
+const GazeLog = ({ logs }) => (
+  <div className="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/20 h-64 overflow-auto">
+    <h3 className="text-white font-serif text-xl mb-4">Gaze Input Log</h3>
+    <div className="space-y-2">
+      {logs.map((log, i) => (
+        <div key={i} className="text-white/80 flex items-center gap-2">
+          <span className="text-xs opacity-50">{log.time}</span>
+          <span>{log.action}</span>
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
+const SensitivitySlider = ({ value, onChange }) => (
+  <div className="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/20">
+    <h3 className="text-white font-serif text-xl mb-4">Gaze Sensitivity</h3>
+    <input 
+      type="range" 
+      min="0.1" 
+      max="0.4" 
+      step="0.05"
+      value={value}
+      onChange={onChange}
+      className="w-full h-2 bg-white/20 rounded-lg appearance-none cursor-pointer"
+    />
+    <div className="flex justify-between mt-2">
+      <span className="text-white/60">More Accurate</span>
+      <span className="text-white/60">More Sensitive</span>
+    </div>
+  </div>
+);
+
+const ModeSelector = ({ currentMode, onModeChange }) => (
+  <div className="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/20">
+    <h3 className="text-white font-serif text-xl mb-4">Text-entry Mode</h3>
+    <div className="space-y-2">
+      {[
+        { id: 1, name: "Letter-by-letter keyboard", desc: "Type letters one by one with no prediction" },
+        { id: 2, name: "Ambiguous keyboard only", desc: "Type with ambiguous keyboard without LLM" },
+        { id: 3, name: "Ambiguous keyboard + LLM", desc: "Uses LLM for word prediction and sentence retrieval" }
+      ].map(mode => (
+        <button
+          key={mode.id}
+          onClick={() => onModeChange(mode.id)}
+          className={`w-full text-left p-4 rounded-lg border transition-all ${
+            currentMode === mode.id
+              ? 'bg-white/20 border-white/40'
+              : 'bg-white/5 border-white/10 hover:bg-white/10'
+          }`}
+        >
+          <div className="text-white font-medium">{mode.name}</div>
+          <div className="text-white/60 text-sm">{mode.desc}</div>
+        </button>
+      ))}
+    </div>
+  </div>
+);
+
+const GestureGuide = () => (
+  <div className="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/20">
+    <h3 className="text-white font-serif text-xl mb-4">Gesture Guide</h3>
+    <div className="grid grid-cols-2 gap-4">
+      {[
+        { direction: "Left-up", letter: "ABCDEF", word: "Word 1" },
+        { direction: "Right-up", letter: "GHIJKLM", word: "Word 2" },
+        { direction: "Left-down", letter: "NOPQRST", word: "Word 3" },
+        { direction: "Right-down", letter: "UVWXYZ", word: "Next page" },
+        { direction: "Closed", letter: "→ Word mode", word: "→ Letter mode" },
+        { direction: "Up", letter: "Delete", word: "Finish" },
+      ].map((gesture, i) => (
+        <div key={i} className="text-white/80 space-y-1">
+          <div className="font-medium">{gesture.direction}</div>
+          <div className="text-sm opacity-60">Letter: {gesture.letter}</div>
+          <div className="text-sm opacity-60">Word: {gesture.word}</div>
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
+export const EyeSettingsPage = () => {
+  const [sensitivity, setSensitivity] = useState(0.2);
+  const [currentMode, setCurrentMode] = useState(1);
+  const [currentGaze, setCurrentGaze] = useState("Center");
+  const [loss, setLoss] = useState(0.015);
+  const [logs, setLogs] = useState([
+    { time: "10:45:23", action: "Looking Up" },
+    { time: "10:45:25", action: "Looking Left" },
+    // Add more sample logs
+  ]);
+
+  return (
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-blue-200 via-purple-300 to-pink-200">
+      <FilmGrain />
+      
+      {/* Top Navigation */}
+      <nav className="relative bg-white/10 backdrop-blur-md border-b border-white/20">
+        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Eye className="h-6 w-6 text-white" />
+            <h1 className="text-white font-serif text-xl">Eye Tracking Settings</h1>
+          </div>
+          <button 
+            onClick={() => window.location.href = '/text-entry'}
+            className="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-lg border border-white/20 hover:bg-white/20 transition-all"
+          >
+            <span className="text-white">Start Text Entry</span>
+            <ArrowRight className="h-4 w-4 text-white" />
+          </button>
+        </div>
+      </nav>
+
+      {/* Main Content */}
+      <div className="relative max-w-7xl mx-auto px-4 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Left Column */}
+          <div className="space-y-8">
+            <GazeDirectionTest currentGaze={currentGaze} loss={loss} />
+            <SensitivitySlider value={sensitivity} onChange={(e) => setSensitivity(e.target.value)} />
+            <ModeSelector currentMode={currentMode} onModeChange={setCurrentMode} />
+          </div>
+          
+          {/* Right Column */}
+          <div className="space-y-8">
+            <GestureGuide />
+            <GazeLog logs={logs} />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
+// Contents of /Users/danielsu/Documents/GitHub/metallama/meta/src/pages/LandingPage.jsx
+import { Eye } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { FilmGrain } from '../components/FilmGrain';
+import { useEffect, useState } from 'react';
+
+export const LandingPage = () => {
+  const [setupComplete, setSetupComplete] = useState(false);
+
+  useEffect(() => {
+    const isSetupComplete = localStorage.getItem('setupComplete') === 'true';
+    setSetupComplete(isSetupComplete);
+  }, []);
+  return (
+    <div className="relative min-h-screen overflow-hidden">
+      {/* Enhanced gradient background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-200 via-purple-300 to-pink-200 opacity-70" />
+      
+      {/* Floating gradient orbs for depth */}
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-400 rounded-full mix-blend-multiply filter blur-3xl animate-blob opacity-30" />
+      <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-pink-400 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-2000 opacity-30" />
+      <div className="absolute bottom-1/4 left-1/3 w-96 h-96 bg-blue-400 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-4000 opacity-30" />
+      
+      <FilmGrain />
+
+      <div className="relative max-w-6xl mx-auto px-4 py-16">
+        <header className="text-center mb-16">
+          <div className="flex justify-center mb-6">
+            <div className="bg-white/10 backdrop-blur-md p-4 rounded-full shadow-xl border border-white/20 hover:border-white/30 transition-colors duration-200">
+              <Eye className="h-16 w-16 text-white" />
+            </div>
+          </div>
+          <h1 className="font-serif text-7xl mb-6 text-white drop-shadow-lg">
+            Deyealog
+          </h1>
+          <p className="text-xl text-white mb-8 max-w-2xl mx-auto font-medium drop-shadow">
+            Communicate effortlessly through the power of eye tracking. Type and express yourself just by looking at the screen.
+          </p>
+          <Link 
+        to={setupComplete ? "/text" : "/setup"}
+        className="inline-block bg-white/10 backdrop-blur-md text-white font-semibold px-8 py-4 rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200 hover:scale-105 border border-white/20 hover:border-white/30 hover:bg-white/20"
+      >
+        {setupComplete ? "Continue to Text Input" : "Get Started"}
+      </Link>
+        </header>
+
+        <div className="grid md:grid-cols-3 gap-8 mb-16">
+          {[
+            {
+              title: "Intuitive Design",
+              description: "Natural and comfortable typing experience using eye movements",
+              icon: "🎯"
+            },
+            {
+              title: "Easy Setup",
+              description: "Quick calibration process to get you started in minutes",
+              icon: "⚡"
+            },
+            {
+              title: "Accessible",
+              description: "Designed for users with various mobility needs",
+              icon: "♿"
+            }
+          ].map((feature, i) => (
+            <div key={i} className="bg-white/10 backdrop-blur-md rounded-xl p-6 shadow-xl hover:shadow-2xl transition-all duration-200 group border border-white/20 hover:border-white/30 hover:bg-white/20">
+              <div className="text-4xl mb-4 transform group-hover:scale-110 transition-transform duration-200">{feature.icon}</div>
+              <h3 className="font-serif text-xl mb-2 text-white">{feature.title}</h3>
+              <p className="text-white/80">{feature.description}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
+// Contents of /Users/danielsu/Documents/GitHub/metallama/meta/src/pages/TextInputPage.jsx
+// src/pages/TextInputPage.jsx
+import { useState, useEffect, useCallback } from "react";
+import { Eye, X, RefreshCcw } from "lucide-react";
+import { FilmGrain } from "../components/FilmGrain";
+import { useWebGazer } from "../context/WebGazerContext";
+import { useNavigate } from "react-router-dom";
+
+const GAZE_THRESHOLD = 1000; // 1 second
+const GAZE_REGIONS = {
+  "left-up": { letters: "ABCDEF", label: "A-F" },
+  "right-up": { letters: "GHIJKLM", label: "G-M" },
+  "left-down": { letters: "NOPQRST", label: "N-T" },
+  "right-down": { letters: "UVWXYZ", label: "U-Z" },
+};
+
+export const TextInputPage = () => {
+  const { isInitialized, positionVideo, initializeWebGazer } = useWebGazer();
+  const navigate = useNavigate();
+  const [inputText, setInputText] = useState("");
+  const [llmSuggestion, setLlmSuggestion] = useState("");
+  const [currentGaze, setCurrentGaze] = useState("center");
+  const [gazeStartTime, setGazeStartTime] = useState(null);
+  const [activeRegion, setActiveRegion] = useState(null);
+
+  const getGazeRegion = useCallback((x, y) => {
+    const screenWidth = window.innerWidth;
+    const screenHeight = window.innerHeight;
+
+    if (y < screenHeight * 0.4) {
+      if (x < screenWidth * 0.4) return "left-up";
+      if (x > screenWidth * 0.6) return "right-up";
+    } else if (y > screenHeight * 0.6) {
+      if (x < screenWidth * 0.4) return "left-down";
+      if (x > screenWidth * 0.6) return "right-down";
+    }
+
+    return "center";
+  }, []);
+
+  useEffect(() => {
+    const isSetupComplete = localStorage.getItem('setupComplete') === 'true';
+    if (!isSetupComplete) {
+      navigate("/");
+      return;
+    }
+
+    const init = async () => {
+      if (!isInitialized) {
+        await initializeWebGazer();
+      }
+      // Hide the video feed
+      if (window.webgazer) {
+        window.webgazer.showVideo(false);
+      }
+      // ...existing code...
+    };
+
+    init();
+
+    // Cleanup to ensure the video feed remains hidden
+    return () => {
+      if (window.webgazer) {
+        window.webgazer.showVideo(false);
+      }
+    };
+  }, [isInitialized, initializeWebGazer, navigate]);
+  // console.log("Current Gaze" + currentGaze);
+  // useEffect(() => {
+  //   const mouseMove = (e) => {
+  //     // console.log(e.clientX);
+  //     // console.log(e.clientY);
+  //     const region = getGazeRegion(e.clientX, e.clientY);
+  //     // console.log("cur region: " + curRegion);
+  //     // console.log("new region: " + region);
+  //     // console.log("cur gaze: " + currentGaze);
+  //     if (region != null) {
+  //       setCurRegion(region);
+  //       setCurrentGaze(region);
+  //     }
+  //     if (curRegion === "center") {
+  //       // setGazeStartTime(null);
+  //       // setActiveRegion(null);
+  //     } else if (!checkRegionGaze(region)) {
+  //       if (region != null && gazeStartTime === null) {
+  //         setGazeStartTime(Date.now());
+  //       }
+  //     } else if (gazeStartTime && !activeRegion) {
+  //       const gazeTime = Date.now() - gazeStartTime;
+  //       console.log("gazeTime: " + gazeTime);
+  //       if (gazeTime >= GAZE_THRESHOLD) {
+  //         setActiveRegion(curRegion);
+  //         const letters = GAZE_REGIONS[activeRegion].letters;
+  //         setInputText((prev) => prev + letters[0]);
+  //         setActiveRegion(null);
+  //         setGazeStartTime(null);
+  //       }
+  //     }
+  //     console.log(gazeStartTime);
+  //   };
+  //   window.addEventListener("mousemove", mouseMove);
+
+  useEffect(() => {
+
+    const gazeListener = (data) => {
+      if (!data) return;
+      const region = getGazeRegion(data.x, data.y);
+
+      if (region !== currentGaze) {
+        setCurrentGaze(region);
+        setGazeStartTime(region === "center" ? null : Date.now());
+        setActiveRegion(null); // Reset active region when gaze changes
+      } else if (region !== "center" && gazeStartTime) {
+        const gazeTime = Date.now() - gazeStartTime;
+        if (gazeTime >= GAZE_THRESHOLD && !activeRegion) {
+          setActiveRegion(region);
+        }
+      }
+    };
+
+    webgazer.setGazeListener(gazeListener);
+
+    return () => {
+      webgazer.clearGazeListener();
+    };
+
+  
+  // console.log("region: " + activeRegion);
+  }, [isInitialized, navigate, getGazeRegion, currentGaze, gazeStartTime, activeRegion]);
+
+  useEffect(() => {
+    if (!activeRegion || !GAZE_REGIONS[activeRegion]) return;
+
+    const label = GAZE_REGIONS[activeRegion].label;
+    setInputText((prev) => prev + label + " ");
+    setActiveRegion(null);
+    setGazeStartTime(null);
+  }, [activeRegion]);
+
+  return (
+    <div className="relative min-h-screen overflow-hidden">
+      {/* Background elements */}
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-200 via-purple-300 to-pink-200 opacity-70" />
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-400 rounded-full mix-blend-multiply filter blur-3xl animate-blob opacity-30" />
+      <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-pink-400 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-2000 opacity-30" />
+      <FilmGrain />
+
+      {/* Letter regions */}
+      <div className="relative w-full h-screen grid grid-cols-3 grid-rows-3 gap-8 p-8">
+        {/* Top row */}
+        <div
+          className={`relative rounded-xl border backdrop-blur-md transition-all duration-300 flex flex-col items-center justify-center
+            ${
+              currentGaze === "left-up" ? "bg-white/30 border-white/40 shadow-lg scale-105" : "bg-white/10 border-white/20 hover:bg-white/20 scale-100"
+            }
+            mt-16`}
+        >
+          <div className="font-serif text-4xl text-white mb-4">{GAZE_REGIONS["left-up"].label}</div>
+        </div>
+        <div></div>
+        <div
+          className={`relative rounded-xl border backdrop-blur-md transition-all duration-300 flex flex-col items-center justify-center
+            ${
+              currentGaze === "right-up" ? "bg-white/30 border-white/40 shadow-lg scale-105" : "bg-white/10 border-white/20 hover:bg-white/20 scale-100"
+            }
+            mt-16`}
+        >
+          <div className="font-serif text-4xl text-white mb-4">{GAZE_REGIONS["right-up"].label}</div>
+        </div>
+
+        {/* Middle row */}
+        <div></div>
+        <div className="space-y-4">
+          {/* Input field */}
+          <div className="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/20">
+            <h3 className="font-serif text-xl text-white mb-2">Text:</h3>
+            <div className="text-white text-lg min-h-[2rem] font-mono">
+              {inputText || "|"}
+            </div>
+          </div>
+
+          {/* LLM suggestions */}
+          <div className="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/20">
+            <h3 className="font-serif text-xl text-white mb-2">LLM:</h3>
+            <div className="text-white/80 text-lg min-h-[2rem]">
+              {llmSuggestion || "Waiting for input..."}
+            </div>
+          </div>
+
+          {/* Control buttons */}
+          <div className="flex justify-center gap-4">
+            <button
+              onClick={() => setInputText("")}
+              className="bg-white/10 backdrop-blur-md text-white px-6 py-3 rounded-lg border border-white/20 hover:bg-white/20 transition-all duration-200 flex items-center gap-2"
+            >
+              <RefreshCcw className="w-4 h-4" />
+              Clear
+            </button>
+            <button
+              onClick={() => setInputText((prev) => prev.slice(0, -4))}
+              className="bg-white/10 backdrop-blur-md text-white px-6 py-3 rounded-lg border border-white/20 hover:bg-white/20 transition-all duration-200 flex items-center gap-2"
+            >
+              <X className="w-4 h-4" />
+              Delete
+            </button>
+          </div>
+
+          {/* Instructions */}
+          <div className="text-center text-white/60 text-sm">
+            Look at the center to reset selection
+          </div>
+        </div>
+        <div></div>
+
+        {/* Bottom row */}
+        <div
+          className={`relative rounded-xl border backdrop-blur-md transition-all duration-300 flex flex-col items-center justify-center
+            ${
+              currentGaze === "left-down" ? "bg-white/30 border-white/40 shadow-lg scale-105" : "bg-white/10 border-white/20 hover:bg-white/20 scale-100"
+            }
+            mb-16`}
+        >
+          <div className="font-serif text-4xl text-white mb-4">{GAZE_REGIONS["left-down"].label}</div>
+        </div>
+        <div></div>
+        <div
+          className={`relative rounded-xl border backdrop-blur-md transition-all duration-300 flex flex-col items-center justify-center
+            ${
+              currentGaze === "right-down" ? "bg-white/30 border-white/40 shadow-lg scale-105" : "bg-white/10 border-white/20 hover:bg-white/20 scale-100"
+            }
+            mb-16`}
+        >
+          <div className="font-serif text-4xl text-white mb-4">{GAZE_REGIONS["right-down"].label}</div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+

@@ -4,7 +4,7 @@ import { LandingPage } from "./pages/LandingPage";
 import { SetupPage } from "./pages/SetupPage";
 import { WebGazerProvider } from "./context/WebGazerContext";
 import TestPage from "./pages/TestPage";
-import { TextInputPage } from "./pages/TextInputPage";
+import TextInputPage from "./pages/TextInputPage";
 
 const App = () => {
   return (

@@ -1,9 +1,10 @@
 // src/pages/TextInputPage.jsx
 import { useState, useEffect, useCallback } from "react";
-import { Eye, X, RefreshCcw } from "lucide-react";
+import { Eye } from "lucide-react";
 import { FilmGrain } from "../components/FilmGrain";
 import { useWebGazer } from "../context/WebGazerContext";
 import { useNavigate } from "react-router-dom";
+import { X, RefreshCcw } from "lucide-react";
 
 const GAZE_THRESHOLD = 1000; // 1 second
 const GAZE_REGIONS = {
@@ -13,24 +14,25 @@ const GAZE_REGIONS = {
   "right-down": { letters: "UVWXYZ", label: "U-Z" },
 };
 
-export const TextInputPage = () => {
-<<<<<<< Updated upstream
-  const { isInitialized, positionVideo, initializeWebGazer } = useWebGazer();
-=======
-  const { isInitialized } = useWebGazer();
->>>>>>> Stashed changes
+const TextInputPage = () => {
+  const { isInitialized, initializeWebGazer } = useWebGazer();
   const navigate = useNavigate();
   const [inputText, setInputText] = useState("");
   const [llmSuggestion, setLlmSuggestion] = useState("");
   const [currentGaze, setCurrentGaze] = useState("center");
   const [gazeStartTime, setGazeStartTime] = useState(null);
   const [activeRegion, setActiveRegion] = useState(null);
+  const [isCharacterMode, setIsCharacterMode] = useState(true); // New state for mode
 
   const getGazeRegion = useCallback((x, y) => {
     const screenWidth = window.innerWidth;
     const screenHeight = window.innerHeight;
 
-    if (y < screenHeight * 0.4) {
+    if (y < screenHeight * 0.2 && x > screenWidth * 0.4 && x < screenWidth * 0.6) {
+      return "clear";
+    } else if (y > screenHeight * 0.8 && x > screenWidth * 0.4 && x < screenWidth * 0.6) {
+      return "delete";
+    } else if (y < screenHeight * 0.4) {
       if (x < screenWidth * 0.4) return "left-up";
       if (x > screenWidth * 0.6) return "right-up";
     } else if (y > screenHeight * 0.6) {
@@ -40,8 +42,7 @@ export const TextInputPage = () => {
 
     return "center";
   }, []);
-<<<<<<< Updated upstream
-
+  
   useEffect(() => {
     const isSetupComplete = localStorage.getItem('setupComplete') === 'true';
     if (!isSetupComplete) {
@@ -103,8 +104,6 @@ export const TextInputPage = () => {
   //     console.log(gazeStartTime);
   //   };
   //   window.addEventListener("mousemove", mouseMove);
-=======
->>>>>>> Stashed changes
 
   useEffect(() => {
 
@@ -129,15 +128,11 @@ export const TextInputPage = () => {
     return () => {
       webgazer.clearGazeListener();
     };
-<<<<<<< Updated upstream
-  }, [isInitialized, navigate, positionVideo, currentGaze, gazeStartTime]);
 
   
   // console.log("region: " + activeRegion);
-=======
   }, [isInitialized, navigate, getGazeRegion, currentGaze, gazeStartTime, activeRegion]);
 
->>>>>>> Stashed changes
   useEffect(() => {
     if (!activeRegion || !GAZE_REGIONS[activeRegion]) return;
 
@@ -246,3 +241,4 @@ export const TextInputPage = () => {
     </div>
   );
 };
+export default TextInputPage;
