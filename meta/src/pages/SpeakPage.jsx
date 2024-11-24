@@ -5,6 +5,7 @@
   import { useNavigate } from "react-router-dom";
   import { H3, P } from '../components/Typography';
   import SpeechToTextComponent from '../components/SpeechToText';
+  import SpeechSynthesis from '../components/SpeechSynthesis';
 
   const GAZE_THRESHOLD = 1000; // 1 second
   const GAZE_REGIONS = {
@@ -310,12 +311,13 @@
               </div>
             <div className="col-span-3 flex flex-col items-center justify-center space-y-8">
               {/* Input field */}
-              <div className="bg-custom-white/10 backdrop-blur-md rounded-xl p-8 border border-custom-white/20 w-full max-w-3xl">
-                <H3 className="font-poppins text-custom-white">Text:</H3>
-                <P className="font-poppins text-custom-white text-xl min-h-[3rem] volleybloww">
-                  {inputText || "|"}
-                </P>
-              </div>
+              <div className="bg-custom-white/10 backdrop-blur-md rounded-xl p-8 border border-custom-white/20 w-full max-w-3xl relative">
+  <H3 className="font-poppins text-custom-white">Text:</H3>
+  <P className="font-poppins text-custom-white text-xl min-h-[3rem] volleybloww pr-12">
+    {inputText || "|"}
+  </P>
+  <SpeechSynthesis text={inputText} />
+</div>
         
               {/* Control buttons */}
               <div className="flex justify-center gap-8">
