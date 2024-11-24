@@ -25,7 +25,7 @@ const SpeakPage = () => {
   const [modeIndex, setModeIndex] = useState(0); // 0: Character, 1: Word, 2: Sentence
   const [wordOptions, setWordOptions] = useState([]);
   const [sentenceOptions, setSentenceOptions] = useState([]);
-
+  const [contextText, setContextText] = useState("");
   const modes = ["character", "word", "sentence"];
 
   const getGazeRegion = useCallback((x, y) => {
@@ -43,9 +43,8 @@ const SpeakPage = () => {
 
     return "center";
   }, []);
-
+  
   const getPredictionForRegion = (region) => {
-    // Handle 'mode-switch' region
     if (region === "mode-switch") {
       return ["Switch Mode", `Next: ${modes[(modeIndex + 1) % modes.length].toUpperCase()}`, ""];
     }
@@ -83,7 +82,7 @@ const SpeakPage = () => {
           },
           body: JSON.stringify({
             letter_ranges: letterRanges.join(" "),
-            context: "What do you want to eat?",
+            context: contextText,
           }),
         }
       );
@@ -111,7 +110,6 @@ const SpeakPage = () => {
       if (!isInitialized) {
         await initializeWebGazer();
       }
-      // Hide the video feed
       if (window.webgazer) {
         window.webgazer.showVideo(false);
       }
@@ -119,7 +117,6 @@ const SpeakPage = () => {
 
     init();
 
-    // Cleanup to ensure the video feed remains hidden
     return () => {
       if (window.webgazer) {
         window.webgazer.showVideo(false);
@@ -135,7 +132,7 @@ const SpeakPage = () => {
       if (region !== currentGaze) {
         setCurrentGaze(region);
         setGazeStartTime(region === "center" ? null : Date.now());
-        setActiveRegion(null); // Reset active region when gaze changes
+        setActiveRegion(null);
       } else if (region !== "center" && gazeStartTime) {
         const gazeTime = Date.now() - gazeStartTime;
         if (gazeTime >= GAZE_THRESHOLD && !activeRegion) {
@@ -162,7 +159,6 @@ const SpeakPage = () => {
   useEffect(() => {
     if (!activeRegion) return;
 
-    // Handle 'mode-switch' region
     if (activeRegion === "mode-switch") {
       setModeIndex((prev) => (prev + 1) % modes.length);
     } else {
@@ -191,7 +187,6 @@ const SpeakPage = () => {
     setGazeStartTime(null);
   }, [activeRegion, modeIndex, inputText, modes]);
 
-  // Initialize predictions when the component mounts
   useEffect(() => {
     const initialRanges = Object.values(GAZE_REGIONS).map(
       (region) => region.label
@@ -215,10 +210,9 @@ const SpeakPage = () => {
 
     return result;
   };
-    
-
+  
   return (
-    <div className="relative min-h-screen overflow-hidden">
+    <div className="relative min-h-screen overflow-hidden font-poppins">
       {/* Enhanced gradient background */}
       <div className="absolute inset-0 bg-gradient-to-br from-berkeley via-lapis to-spring opacity-90" />
 
@@ -238,13 +232,13 @@ const SpeakPage = () => {
             const predictions = getPredictionForRegion("left-up");
             return (
               <>
-                <div className="font-serif text-5xl text-custom-white mb-2">
+                <div className="font-poppins text-5xl text-custom-white mb-2">
                   {convertHyphenFormat(predictions[0])}
                 </div>
-                <div className="font-serif text-3xl text-gray-200">
+                <div className="font-poppins text-3xl text-gray-200">
                   {predictions[1]}
                 </div>
-                <div className="font-serif text-2xl text-gray-400">
+                <div className="font-poppins text-2xl text-gray-400">
                   {predictions[2]}
                 </div>
               </>
@@ -261,10 +255,10 @@ const SpeakPage = () => {
               }
               mt-16`}
         >
-          <div className="font-serif text-5xl text-custom-white mb-2">
+          <div className="font-poppins text-5xl text-custom-white mb-2">
             Switch Mode
           </div>
-          <div className="font-serif text-3xl text-gray-200">
+          <div className="font-poppins text-3xl text-gray-200">
             Next Mode: {modes[(modeIndex + 1) % modes.length].toUpperCase()}
           </div>
         </div>
@@ -281,13 +275,13 @@ const SpeakPage = () => {
             const predictions = getPredictionForRegion("right-up");
             return (
               <>
-                <div className="font-serif text-5xl text-custom-white mb-2">
+                <div className="font-poppins text-5xl text-custom-white mb-2">
                   {convertHyphenFormat(predictions[0])}
                 </div>
-                <div className="font-serif text-3xl text-gray-200">
+                <div className="font-poppins text-3xl text-gray-200">
                   {predictions[1]}
                 </div>
-                <div className="font-serif text-2xl text-gray-400">
+                <div className="font-poppins text-2xl text-gray-400">
                   {predictions[2]}
                 </div>
               </>
@@ -300,19 +294,19 @@ const SpeakPage = () => {
         <div className="space-y-8">
           {/* Input field */}
           <div className="bg-custom-white/10 backdrop-blur-md rounded-xl p-8 border border-custom-white/20">
-            <H3 className="text-custom-white mb-4">Text:</H3>
-            <P className="text-custom-white text-xl min-h-[3rem] font-mono">
+            <H3 className="font-poppins text-custom-white mb-4">Text:</H3>
+            <P className="font-poppins text-custom-white text-xl min-h-[3rem]">
               {inputText || "|"}
             </P>
           </div>
 
-          <SpeechToTextComponent/>
-
+          <SpeechToTextComponent setter={setContextText}/>
+    
           {/* Control buttons */}
           <div className="flex justify-center gap-8">
             <button
               onClick={() => setInputText("")}
-              className="bg-custom-white/10 backdrop-blur-md text-custom-white px-8 py-4 rounded-lg border border-custom-white/20 hover:bg-custom-white/20 transition-all duration-200 flex items-center gap-4"
+              className="bg-custom-white/10 backdrop-blur-md font-poppins text-custom-white px-8 py-4 rounded-lg border border-custom-white/20 hover:bg-custom-white/20 transition-all duration-200 flex items-center gap-4"
             >
               <RefreshCcw className="w-6 h-6" />
               Clear
@@ -320,10 +314,10 @@ const SpeakPage = () => {
           </div>
 
           {/* Instructions */}
-          <div className="text-center text-custom-white/60 text-lg">
+          <div className="text-center font-poppins text-custom-white/60 text-lg">
             Gaze at "Switch Mode" to cycle modes
           </div>
-          <div className="text-center text-custom-white/80 text-lg">
+          <div className="text-center font-poppins text-custom-white/80 text-lg">
             Current Mode: {modes[modeIndex % modes.length].toUpperCase()}
           </div>
         </div>
@@ -343,13 +337,13 @@ const SpeakPage = () => {
             const predictions = getPredictionForRegion("left-down");
             return (
               <>
-                <div className="font-serif text-5xl text-custom-white mb-2">
+                <div className="font-poppins text-5xl text-custom-white mb-2">
                   {convertHyphenFormat(predictions[0])}
                 </div>
-                <div className="font-serif text-3xl text-gray-200">
+                <div className="font-poppins text-3xl text-gray-200">
                   {predictions[1]}
                 </div>
-                <div className="font-serif text-2xl text-gray-400">
+                <div className="font-poppins text-2xl text-gray-400">
                   {predictions[2]}
                 </div>
               </>
@@ -370,13 +364,13 @@ const SpeakPage = () => {
             const predictions = getPredictionForRegion("right-down");
             return (
               <>
-                <div className="font-serif text-5xl text-custom-white mb-2">
+                <div className="font-poppins text-5xl text-custom-white mb-2">
                   {convertHyphenFormat(predictions[0])}
                 </div>
-                <div className="font-serif text-3xl text-gray-200">
+                <div className="font-poppins text-3xl text-gray-200">
                   {predictions[1]}
                 </div>
-                <div className="font-serif text-2xl text-gray-400">
+                <div className="font-poppins text-2xl text-gray-400">
                   {predictions[2]}
                 </div>
               </>
