@@ -4,14 +4,14 @@ import { Eye } from "lucide-react";
 import { FilmGrain } from "../components/FilmGrain";
 import { useWebGazer } from "../context/WebGazerContext";
 import { useNavigate } from "react-router-dom";
-import { X, RefreshCcw } from "lucide-react";
+import { RefreshCcw } from "lucide-react";
 
 const GAZE_THRESHOLD = 1000; // 1 second
 const GAZE_REGIONS = {
-  "left-up": { letters: "ABCDEF", label: "A-F" },
-  "right-up": { letters: "GHIJKLM", label: "G-M" },
-  "left-down": { letters: "NOPQRST", label: "N-T" },
-  "right-down": { letters: "UVWXYZ", label: "U-Z" },
+  "left-up": { letters: "A-F", label: "A-F" },
+  "right-up": { letters: "G-M", label: "G-M" },
+  "left-down": { letters: "N-T", label: "N-T" },
+  "right-down": { letters: "U-Z", label: "U-Z" },
 };
 
 const TextInputPage = () => {
@@ -22,15 +22,27 @@ const TextInputPage = () => {
   const [currentGaze, setCurrentGaze] = useState("center");
   const [gazeStartTime, setGazeStartTime] = useState(null);
   const [activeRegion, setActiveRegion] = useState(null);
-  const [isCharacterMode, setIsCharacterMode] = useState(true); // New state for mode
+  const [isCharacterMode, setIsCharacterMode] = useState(true);
+  const [isWordMode, setIsWordMode] = useState(false);
+  const [isSentenceMode, setIsSentenceMode] = useState(false);
+  const [wordOptions, setWordOptions] = useState([]);
+  const [sentenceOptions, setSentenceOptions] = useState([]);
 
   const getGazeRegion = useCallback((x, y) => {
     const screenWidth = window.innerWidth;
     const screenHeight = window.innerHeight;
 
-    if (y < screenHeight * 0.2 && x > screenWidth * 0.4 && x < screenWidth * 0.6) {
+    if (
+      y < screenHeight * 0.2 &&
+      x > screenWidth * 0.4 &&
+      x < screenWidth * 0.6
+    ) {
       return "clear";
-    } else if (y > screenHeight * 0.8 && x > screenWidth * 0.4 && x < screenWidth * 0.6) {
+    } else if (
+      y > screenHeight * 0.8 &&
+      x > screenWidth * 0.4 &&
+      x < screenWidth * 0.6
+    ) {
       return "delete";
     } else if (y < screenHeight * 0.4) {
       if (x < screenWidth * 0.4) return "left-up";
@@ -42,9 +54,49 @@ const TextInputPage = () => {
 
     return "center";
   }, []);
-  
+
+  const getPredictionForRegion = (region, mode) => {
+    if (mode === "character") {
+      return GAZE_REGIONS[region].label;
+    } else if (mode === "word") {
+      const index = Object.keys(GAZE_REGIONS).indexOf(region);
+      return wordOptions[index]?.prompt || "No prediction available";
+    } else if (mode === "sentence") {
+      const index = Object.keys(GAZE_REGIONS).indexOf(region);
+      return sentenceOptions[index] || "No prediction available";
+    }
+  };
+
+  const fetchPredictions = async (letterRanges) => {
+    try {
+      const response = await fetch(
+        "https://deyelog.jasoncameron.dev/api/predict",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            letter_ranges: letterRanges.join(" "),
+            context: "What do you want to eat?",
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch predictions");
+      }
+
+      const data = await response.json();
+      setWordOptions(data.prompt_options || []);
+      setSentenceOptions(data.sentences || []);
+    } catch (error) {
+      console.error("Error fetching predictions:", error);
+    }
+  };
+
   useEffect(() => {
-    const isSetupComplete = localStorage.getItem('setupComplete') === 'true';
+    const isSetupComplete = localStorage.getItem("setupComplete") === "true";
     if (!isSetupComplete) {
       navigate("/");
       return;
@@ -58,7 +110,6 @@ const TextInputPage = () => {
       if (window.webgazer) {
         window.webgazer.showVideo(false);
       }
-      // ...existing code...
     };
 
     init();
@@ -70,43 +121,8 @@ const TextInputPage = () => {
       }
     };
   }, [isInitialized, initializeWebGazer, navigate]);
-  // console.log("Current Gaze" + currentGaze);
-  // useEffect(() => {
-  //   const mouseMove = (e) => {
-  //     // console.log(e.clientX);
-  //     // console.log(e.clientY);
-  //     const region = getGazeRegion(e.clientX, e.clientY);
-  //     // console.log("cur region: " + curRegion);
-  //     // console.log("new region: " + region);
-  //     // console.log("cur gaze: " + currentGaze);
-  //     if (region != null) {
-  //       setCurRegion(region);
-  //       setCurrentGaze(region);
-  //     }
-  //     if (curRegion === "center") {
-  //       // setGazeStartTime(null);
-  //       // setActiveRegion(null);
-  //     } else if (!checkRegionGaze(region)) {
-  //       if (region != null && gazeStartTime === null) {
-  //         setGazeStartTime(Date.now());
-  //       }
-  //     } else if (gazeStartTime && !activeRegion) {
-  //       const gazeTime = Date.now() - gazeStartTime;
-  //       console.log("gazeTime: " + gazeTime);
-  //       if (gazeTime >= GAZE_THRESHOLD) {
-  //         setActiveRegion(curRegion);
-  //         const letters = GAZE_REGIONS[activeRegion].letters;
-  //         setInputText((prev) => prev + letters[0]);
-  //         setActiveRegion(null);
-  //         setGazeStartTime(null);
-  //       }
-  //     }
-  //     console.log(gazeStartTime);
-  //   };
-  //   window.addEventListener("mousemove", mouseMove);
 
   useEffect(() => {
-
     const gazeListener = (data) => {
       if (!data) return;
       const region = getGazeRegion(data.x, data.y);
@@ -128,19 +144,48 @@ const TextInputPage = () => {
     return () => {
       window.webgazer.clearGazeListener();
     };
-
-  
-  // console.log("region: " + activeRegion);
-  }, [isInitialized, navigate, getGazeRegion, currentGaze, gazeStartTime, activeRegion]);
+  }, [
+    isInitialized,
+    navigate,
+    getGazeRegion,
+    currentGaze,
+    gazeStartTime,
+    activeRegion,
+  ]);
 
   useEffect(() => {
-    if (!activeRegion || !GAZE_REGIONS[activeRegion]) return;
+    if (!activeRegion) return;
 
-    const label = GAZE_REGIONS[activeRegion].label;
-    setInputText((prev) => prev + label + " ");
+    if (isCharacterMode) {
+      const label = GAZE_REGIONS[activeRegion].label;
+      setInputText((prev) => prev + label + " ");
+      // Here you can collect letter ranges for prediction
+      const selectedRanges = inputText
+        .trim()
+        .split(" ")
+        .concat(label.trim());
+      fetchPredictions(selectedRanges);
+    } else if (isWordMode) {
+      const index = Object.keys(GAZE_REGIONS).indexOf(activeRegion);
+      const word = wordOptions[index]?.prompt || "";
+      setInputText((prev) => prev + word + " ");
+    } else if (isSentenceMode) {
+      const index = Object.keys(GAZE_REGIONS).indexOf(activeRegion);
+      const sentence = sentenceOptions[index] || "";
+      setInputText((prev) => prev + sentence + " ");
+    }
+
     setActiveRegion(null);
     setGazeStartTime(null);
-  }, [activeRegion]);
+  }, [activeRegion, isCharacterMode, isWordMode, isSentenceMode, inputText]);
+
+  // Initialize predictions when the component mounts
+  useEffect(() => {
+    const initialRanges = Object.values(GAZE_REGIONS).map(
+      (region) => region.label
+    );
+    fetchPredictions(initialRanges);
+  }, []);
 
   return (
     <div className="relative min-h-screen overflow-hidden">
@@ -155,22 +200,70 @@ const TextInputPage = () => {
         {/* Top row */}
         <div
           className={`relative rounded-xl border backdrop-blur-md transition-all duration-300 flex flex-col items-center justify-center w-full h-64
-            ${
-              currentGaze === "left-up" ? "bg-white/30 border-white/40 shadow-lg scale-105" : "bg-white/10 border-white/20 hover:bg-white/20 scale-100"
-            }
-            mt-16`}
+              ${
+                currentGaze === "left-up"
+                  ? "bg-white/30 border-white/40 shadow-lg scale-105"
+                  : "bg-white/10 border-white/20 hover:bg-white/20 scale-100"
+              }
+              mt-16`}
         >
-          <div className="font-serif text-5xl text-white mb-4">{GAZE_REGIONS["left-up"].label}</div>
+          <div className="font-serif text-5xl text-white mb-2">
+            {getPredictionForRegion("left-up", isCharacterMode
+              ? "character"
+              : isWordMode
+              ? "word"
+              : "sentence")}
+          </div>
+          <div className="font-serif text-3xl text-gray-400">
+            {getPredictionForRegion("left-up", isCharacterMode
+              ? isWordMode
+                ? "word"
+                : "sentence"
+              : isCharacterMode
+              ? "character"
+              : "word")}
+          </div>
+          <div className="font-serif text-2xl text-gray-600">
+            {getPredictionForRegion("left-up", isCharacterMode
+              ? "sentence"
+              : isWordMode
+              ? "character"
+              : "word")}
+          </div>
         </div>
         <div></div>
         <div
           className={`relative rounded-xl border backdrop-blur-md transition-all duration-300 flex flex-col items-center justify-center w-full h-64
-            ${
-              currentGaze === "right-up" ? "bg-white/30 border-white/40 shadow-lg scale-105" : "bg-white/10 border-white/20 hover:bg-white/20 scale-100"
-            }
-            mt-16`}
+              ${
+                currentGaze === "right-up"
+                  ? "bg-white/30 border-white/40 shadow-lg scale-105"
+                  : "bg-white/10 border-white/20 hover:bg-white/20 scale-100"
+              }
+              mt-16`}
         >
-          <div className="font-serif text-5xl text-white mb-4">{GAZE_REGIONS["right-up"].label}</div>
+          <div className="font-serif text-5xl text-white mb-2">
+            {getPredictionForRegion("right-up", isCharacterMode
+              ? "character"
+              : isWordMode
+              ? "word"
+              : "sentence")}
+          </div>
+          <div className="font-serif text-3xl text-gray-400">
+            {getPredictionForRegion("right-up", isCharacterMode
+              ? isWordMode
+                ? "word"
+                : "sentence"
+              : isCharacterMode
+              ? "character"
+              : "word")}
+          </div>
+          <div className="font-serif text-2xl text-gray-600">
+            {getPredictionForRegion("right-up", isCharacterMode
+              ? "sentence"
+              : isWordMode
+              ? "character"
+              : "word")}
+          </div>
         </div>
 
         {/* Middle row */}
@@ -201,13 +294,6 @@ const TextInputPage = () => {
               <RefreshCcw className="w-6 h-6" />
               Clear
             </button>
-            <button
-              onClick={() => setInputText((prev) => prev.slice(0, -4))}
-              className="bg-white/10 backdrop-blur-md text-white px-8 py-4 rounded-lg border border-white/20 hover:bg-white/20 transition-all duration-200 flex items-center gap-4"
-            >
-              <X className="w-6 h-6" />
-              Delete
-            </button>
           </div>
 
           {/* Instructions */}
@@ -220,25 +306,74 @@ const TextInputPage = () => {
         {/* Bottom row */}
         <div
           className={`relative rounded-xl border backdrop-blur-md transition-all duration-300 flex flex-col items-center justify-center w-full h-64
-            ${
-              currentGaze === "left-down" ? "bg-white/30 border-white/40 shadow-lg scale-105" : "bg-white/10 border-white/20 hover:bg-white/20 scale-100"
-            }
-            mb-16`}
+              ${
+                currentGaze === "left-down"
+                  ? "bg-white/30 border-white/40 shadow-lg scale-105"
+                  : "bg-white/10 border-white/20 hover:bg-white/20 scale-100"
+              }
+              mb-16`}
         >
-          <div className="font-serif text-5xl text-white mb-4">{GAZE_REGIONS["left-down"].label}</div>
+          <div className="font-serif text-5xl text-white mb-2">
+            {getPredictionForRegion("left-down", isCharacterMode
+              ? "character"
+              : isWordMode
+              ? "word"
+              : "sentence")}
+          </div>
+          <div className="font-serif text-3xl text-gray-400">
+            {getPredictionForRegion("left-down", isCharacterMode
+              ? isWordMode
+                ? "word"
+                : "sentence"
+              : isCharacterMode
+              ? "character"
+              : "word")}
+          </div>
+          <div className="font-serif text-2xl text-gray-600">
+            {getPredictionForRegion("left-down", isCharacterMode
+              ? "sentence"
+              : isWordMode
+              ? "character"
+              : "word")}
+          </div>
         </div>
         <div></div>
         <div
           className={`relative rounded-xl border backdrop-blur-md transition-all duration-300 flex flex-col items-center justify-center w-full h-64
-            ${
-              currentGaze === "right-down" ? "bg-white/30 border-white/40 shadow-lg scale-105" : "bg-white/10 border-white/20 hover:bg-white/20 scale-100"
-            }
-            mb-16`}
+              ${
+                currentGaze === "right-down"
+                  ? "bg-white/30 border-white/40 shadow-lg scale-105"
+                  : "bg-white/10 border-white/20 hover:bg-white/20 scale-100"
+              }
+              mb-16`}
         >
-          <div className="font-serif text-5xl text-white mb-4">{GAZE_REGIONS["right-down"].label}</div>
+          <div className="font-serif text-5xl text-white mb-2">
+            {getPredictionForRegion("right-down", isCharacterMode
+              ? "character"
+              : isWordMode
+              ? "word"
+              : "sentence")}
+          </div>
+          <div className="font-serif text-3xl text-gray-400">
+            {getPredictionForRegion("right-down", isCharacterMode
+              ? isWordMode
+                ? "word"
+                : "sentence"
+              : isCharacterMode
+              ? "character"
+              : "word")}
+          </div>
+          <div className="font-serif text-2xl text-gray-600">
+            {getPredictionForRegion("right-down", isCharacterMode
+              ? "sentence"
+              : isWordMode
+              ? "character"
+              : "word")}
+          </div>
         </div>
       </div>
     </div>
   );
 };
+
 export default TextInputPage;
