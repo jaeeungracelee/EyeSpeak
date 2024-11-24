@@ -2,6 +2,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Eye, X, RefreshCcw } from 'lucide-react';
 import { FilmGrain } from '../components/FilmGrain';
+import { useWebGazer } from '../context/WebGazerContext';
+import { useNavigate } from 'react-router-dom';
 
 const GAZE_THRESHOLD = 3000; // 3 seconds
 const GAZE_REGIONS = {
@@ -12,13 +14,15 @@ const GAZE_REGIONS = {
 };
 
 export const TextInputPage = () => {
-  const [inputText, setInputText] = useState('');
-  const [llmSuggestion, setLlmSuggestion] = useState('');
-  const [currentGaze, setCurrentGaze] = useState('center');
-  const [gazeStartTime, setGazeStartTime] = useState(null);
-  const [activeRegion, setActiveRegion] = useState(null);
+    const { isInitialized, positionVideo } = useWebGazer();
+    const navigate = useNavigate();
+    const [inputText, setInputText] = useState('');
+    const [llmSuggestion, setLlmSuggestion] = useState('');
+    const [currentGaze, setCurrentGaze] = useState('center');
+    const [gazeStartTime, setGazeStartTime] = useState(null);
+    const [activeRegion, setActiveRegion] = useState(null);
 
-  const getGazeRegion = useCallback((x, y) => {
+    const getGazeRegion = useCallback((x, y) => {
     const screenWidth = window.innerWidth;
     const screenHeight = window.innerHeight;
     
@@ -34,13 +38,16 @@ export const TextInputPage = () => {
   }, []);
 
   useEffect(() => {
-    if (!webgazer) return;
+    if (!isInitialized) {
+      // If WebGazer isn't initialized, go back to setup
+      navigate('/');
+      return;
+    }
 
     const gazeListener = (data) => {
-      if (!data) return;
-      
-      const region = getGazeRegion(data.x, data.y);
-      setCurrentGaze(region);
+        if (!data) return;
+        const region = getGazeRegion(data.x, data.y);
+        setCurrentGaze(region);
       
       if (region === 'center') {
         setGazeStartTime(null);
@@ -55,9 +62,13 @@ export const TextInputPage = () => {
       }
     };
 
+    
     webgazer.setGazeListener(gazeListener);
-    return () => webgazer.clearGazeListener();
-  }, [currentGaze, gazeStartTime, getGazeRegion]);
+    
+    return () => {
+      webgazer.clearGazeListener();
+    };
+  }, [isInitialized, navigate, positionVideo]);
 
   useEffect(() => {
     if (!activeRegion || !GAZE_REGIONS[activeRegion]) return;
