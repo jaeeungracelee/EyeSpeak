@@ -19,7 +19,7 @@ const CALIBRATION_POINTS = [
 ];
 
 // Create sequence by repeating points 3 times
-const CALIBRATION_SEQUENCE = Array(2).fill(CALIBRATION_POINTS).flat();
+const CALIBRATION_SEQUENCE = Array(1).fill(CALIBRATION_POINTS).flat();
 
 export const SetupPage = () => {
   const { initializeWebGazer, positionVideo } = useWebGazer();
@@ -72,6 +72,7 @@ export const SetupPage = () => {
       Math.abs(clickedPoint.x - targetX) < 5 &&
       Math.abs(clickedPoint.y - targetY) < 5
     ) {
+      // window.webgazer.setSaveDataAcrossSessions(false).begin();
       window.webgazer.recordScreenPosition(e.clientX, e.clientY, "click");
       setShowFeedback(true);
       setTimeout(() => setShowFeedback(false), 500);

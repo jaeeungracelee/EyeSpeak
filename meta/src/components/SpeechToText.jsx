@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 
-const SpeechToTextComponent = () => {
+const SpeechToTextComponent = (props) => {
   const [transcribedText, setTranscribedText] = useState("");
+  const [isRecording, setIsRecording] = useState(false);
 
   const handleRecordButtonClick = () => {
     if (!window.SpeechRecognition && !window.webkitSpeechRecognition) {
@@ -15,16 +16,19 @@ const SpeechToTextComponent = () => {
 
     recognition.onstart = () => {
       console.log("Voice recognition started. Speak into the microphone.");
+      setIsRecording(true);
     };
 
     recognition.onspeechend = () => {
       console.log("Voice recognition stopped.");
       recognition.stop();
+      setIsRecording(false);
     };
 
     recognition.onresult = (event) => {
       const transcript = event.results[0][0].transcript;
       setTranscribedText(transcript);
+      props.setter(transcript);
     };
 
     recognition.start();
@@ -38,7 +42,11 @@ const SpeechToTextComponent = () => {
           className="bg-transparent border-none cursor-pointer text-custom-white text-3xl"
           onClick={handleRecordButtonClick}
         >
-           <span className="material-icons">mic</span>
+          <span
+            className="material-icons"
+            style={{ color: isRecording ? "red" : "white" }}
+            >mic
+          </span> {/* Microphone icon changes color when recording */}
         </button>
         <p className="text-custom-white/90 text-xl min-h-[3rem]">
           {transcribedText || "Press the mic to start speaking..."}

@@ -1,10 +1,11 @@
-import { Eye } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Eye, Settings } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { H1, H2, H3, P } from '../components/Typography';
 
 export const LandingPage = () => {
   const [setupComplete, setSetupComplete] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const isSetupComplete = localStorage.getItem('setupComplete') === 'true';
@@ -20,6 +21,16 @@ export const LandingPage = () => {
       <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-spring rounded-full mix-blend-multiply filter blur-3xl animate-blob opacity-50" />
       <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-lapis rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-2000 opacity-50" />
       <div className="absolute bottom-1/4 left-1/3 w-96 h-96 bg-berkeley rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-4000 opacity-50" />
+
+      {/* Settings Icon */}
+      <div className="absolute top-4 left-4">
+        <button
+          onClick={() => navigate('/settings')}
+          className="p-3 bg-custom-white/10 backdrop-blur-md rounded-full shadow-lg border border-custom-white/40 hover:border-custom-white/60 transition-colors duration-200 hover:bg-custom-white/20"
+        >
+          <Settings className="h-8 w-8 text-custom-white" />
+        </button>
+      </div>
 
       <div className="relative max-w-6xl mx-auto px-4 py-16">
         <header className="text-center mb-16">

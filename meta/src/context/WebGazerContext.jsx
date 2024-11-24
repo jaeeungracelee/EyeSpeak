@@ -21,6 +21,7 @@ export const WebGazerProvider = ({ children }) => {
         window.webgazer.showFaceOverlay(true);
         window.webgazer.showPredictionPoints(true);
 
+        
         setIsInitialized(true);
         return true;
       } catch (error) {
