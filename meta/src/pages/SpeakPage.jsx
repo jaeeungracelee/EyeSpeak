@@ -1,4 +1,4 @@
-// src/pages/TextInputPage.jsx
+// src/pages/SpeakPage.jsx
 import { useState, useEffect, useCallback } from "react";
 import { Eye, RefreshCcw } from "lucide-react";
 import { useWebGazer } from "../context/WebGazerContext";
@@ -6,7 +6,6 @@ import { useNavigate } from "react-router-dom";
 import { H3, P } from '../components/Typography';
 
 const GAZE_THRESHOLD = 1000; // 1 second
-const EYE_CLOSED_THRESHOLD = 1500; // 1.5 seconds
 const GAZE_REGIONS = {
   "left-up": { letters: "A-F", label: "A-F" },
   "right-up": { letters: "G-M", label: "G-M" },
@@ -25,8 +24,6 @@ const SpeakPage = () => {
   const [modeIndex, setModeIndex] = useState(0); // 0: Character, 1: Word, 2: Sentence
   const [wordOptions, setWordOptions] = useState([]);
   const [sentenceOptions, setSentenceOptions] = useState([]);
-  const [eyeClosedStartTime, setEyeClosedStartTime] = useState(null);
-  const [eyesClosed, setEyesClosed] = useState(false);
 
   const modes = ["character", "word", "sentence"];
 
@@ -34,21 +31,10 @@ const SpeakPage = () => {
     const screenWidth = window.innerWidth;
     const screenHeight = window.innerHeight;
 
-    if (
-      y < screenHeight * 0.2 &&
-      x > screenWidth * 0.4 &&
-      x < screenWidth * 0.6
-    ) {
-      return "clear";
-    } else if (
-      y > screenHeight * 0.8 &&
-      x > screenWidth * 0.4 &&
-      x < screenWidth * 0.6
-    ) {
-      return "delete";
-    } else if (y < screenHeight * 0.4) {
+    if (y < screenHeight * 0.4) {
       if (x < screenWidth * 0.4) return "left-up";
       if (x > screenWidth * 0.6) return "right-up";
+      if (x >= screenWidth * 0.4 && x <= screenWidth * 0.6) return "mode-switch";
     } else if (y > screenHeight * 0.6) {
       if (x < screenWidth * 0.4) return "left-down";
       if (x > screenWidth * 0.6) return "right-down";
@@ -58,9 +44,9 @@ const SpeakPage = () => {
   }, []);
 
   const getPredictionForRegion = (region) => {
-    // Handle 'clear' and 'delete' regions
-    if (region === "clear" || region === "delete") {
-      return [region.toUpperCase(), "", ""];
+    // Handle 'mode-switch' region
+    if (region === "mode-switch") {
+      return ["Switch Mode", `Next: ${modes[(modeIndex + 1) % modes.length].toUpperCase()}`, ""];
     }
 
     const letterRange = GAZE_REGIONS[region]?.label || "Unknown";
@@ -169,19 +155,15 @@ const SpeakPage = () => {
     currentGaze,
     gazeStartTime,
     activeRegion,
-    eyeClosedStartTime,
-    eyesClosed,
     modes.length,
   ]);
 
   useEffect(() => {
     if (!activeRegion) return;
 
-    // Handle 'clear' and 'delete' regions
-    if (activeRegion === "clear") {
-      setInputText("");
-    } else if (activeRegion === "delete") {
-      setInputText((prev) => prev.slice(0, -1));
+    // Handle 'mode-switch' region
+    if (activeRegion === "mode-switch") {
+      setModeIndex((prev) => (prev + 1) % modes.length);
     } else {
       const currentMode = modes[modeIndex % modes.length];
 
@@ -216,6 +198,24 @@ const SpeakPage = () => {
     fetchPredictions(initialRanges);
   }, []);
 
+  const convertHyphenFormat = (text) => {
+    if(text.length !== 3 || text.charAt(1) !== "-") {
+      return text;
+    }
+    const start = text.charAt(0);
+    const end = text.charAt(2);
+    const startCode = start.charCodeAt(0);
+    const endCode = end.charCodeAt(0);
+    let result = "";
+
+    for (let i = startCode; i <= endCode; i++) {
+      result += String.fromCharCode(i);
+    }
+
+    return result;
+  };
+    
+
   return (
     <div className="relative min-h-screen overflow-hidden">
       {/* Enhanced gradient background */}
@@ -238,7 +238,7 @@ const SpeakPage = () => {
             return (
               <>
                 <div className="font-serif text-5xl text-custom-white mb-2">
-                  {predictions[0]}
+                  {convertHyphenFormat(predictions[0])}
                 </div>
                 <div className="font-serif text-3xl text-gray-200">
                   {predictions[1]}
@@ -250,7 +250,23 @@ const SpeakPage = () => {
             );
           })()}
         </div>
-        <div></div>
+        {/* Mode Switch Zone */}
+        <div
+          className={`relative rounded-xl border backdrop-blur-md transition-all duration-300 flex flex-col items-center justify-center w-full h-64
+              ${
+                currentGaze === "mode-switch"
+                  ? "bg-custom-white/30 border-custom-white/40 shadow-lg scale-105"
+                  : "bg-custom-white/10 border-custom-white/20 hover:bg-custom-white/20"
+              }
+              mt-16`}
+        >
+          <div className="font-serif text-5xl text-custom-white mb-2">
+            Switch Mode
+          </div>
+          <div className="font-serif text-3xl text-gray-200">
+            Next Mode: {modes[(modeIndex + 1) % modes.length].toUpperCase()}
+          </div>
+        </div>
         <div
           className={`relative rounded-xl border backdrop-blur-md transition-all duration-300 flex flex-col items-center justify-center w-full h-64
               ${
@@ -265,7 +281,7 @@ const SpeakPage = () => {
             return (
               <>
                 <div className="font-serif text-5xl text-custom-white mb-2">
-                  {predictions[0]}
+                  {convertHyphenFormat(predictions[0])}
                 </div>
                 <div className="font-serif text-3xl text-gray-200">
                   {predictions[1]}
@@ -310,7 +326,7 @@ const SpeakPage = () => {
 
           {/* Instructions */}
           <div className="text-center text-custom-white/60 text-lg">
-            Close your eyes for 1.5 seconds to switch modes
+            Gaze at "Switch Mode" to cycle modes
           </div>
           <div className="text-center text-custom-white/80 text-lg">
             Current Mode: {modes[modeIndex % modes.length].toUpperCase()}
@@ -333,7 +349,7 @@ const SpeakPage = () => {
             return (
               <>
                 <div className="font-serif text-5xl text-custom-white mb-2">
-                  {predictions[0]}
+                  {convertHyphenFormat(predictions[0])}
                 </div>
                 <div className="font-serif text-3xl text-gray-200">
                   {predictions[1]}
@@ -360,7 +376,7 @@ const SpeakPage = () => {
             return (
               <>
                 <div className="font-serif text-5xl text-custom-white mb-2">
-                  {predictions[0]}
+                  {convertHyphenFormat(predictions[0])}
                 </div>
                 <div className="font-serif text-3xl text-gray-200">
                   {predictions[1]}
