@@ -1,17 +1,23 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Volume2 } from 'lucide-react';
 
 const SpeechSynthesis = ({ text }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [audioElement, setAudioElement] = useState(null);
 
+  // Get the selected voice from localStorage
+  const getSelectedVoice = () => {
+    return localStorage.getItem('selectedVoice') || 'NEUTRAL';
+  };
+
   const speakText = async () => {
     if (!text.trim() || isPlaying) return;
 
     try {
       setIsPlaying(true);
+      const selectedVoice = getSelectedVoice();
       
-      const response = await fetch('https://deyelog.jasoncameron.dev/api/synthesize-speech', {
+      const response = await fetch(`https://deyelog.jasoncameron.dev/api/synthesize-speech?voice=${selectedVoice}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -21,18 +27,14 @@ const SpeechSynthesis = ({ text }) => {
 
       if (!response.ok) throw new Error('Speech synthesis failed');
 
-      // Get the audio data as a blob
       const audioBlob = await response.blob();
-      
-      // Create a URL for the blob
       const audioUrl = URL.createObjectURL(audioBlob);
       
-      // Create and configure audio element
       const audio = new Audio(audioUrl);
       
       audio.onended = () => {
         setIsPlaying(false);
-        URL.revokeObjectURL(audioUrl); // Clean up the URL
+        URL.revokeObjectURL(audioUrl);
         setAudioElement(null);
       };
       
@@ -53,7 +55,6 @@ const SpeechSynthesis = ({ text }) => {
     }
   };
 
-  // Stop playback if needed
   const stopPlayback = () => {
     if (audioElement) {
       audioElement.pause();

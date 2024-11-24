@@ -2,6 +2,42 @@ import { useState, useEffect } from 'react';
 import { Eye, ArrowRight } from 'lucide-react';
 import { H1, H3, P } from '../components/Typography';
 
+const VoiceSelector = () => {
+  const [selectedVoice, setSelectedVoice] = useState(localStorage.getItem('selectedVoice') || 'neutral');
+
+  const handleVoiceChange = (voice) => {
+    setSelectedVoice(voice);
+    localStorage.setItem('selectedVoice', voice);
+  };
+
+  return (
+    <div className="bg-custom-white/10 backdrop-blur-md rounded-xl p-10 border border-custom-white/40 hover:border-custom-white/60 hover:bg-custom-white/20 transition-colors">
+      <H3 className="text-custom-white text-2xl mb-6">Voice Selection</H3>
+      <div className="space-y-4">
+        {[
+          { id: 'MALE', label: 'Male Voice', desc: 'Deep masculine voice' },
+          { id: 'FEMALE', label: 'Female Voice', desc: 'Soft feminine voice' },
+          { id: 'NEUTRAL', label: 'Neutral Voice', desc: 'Gender-neutral voice' },
+          { id: 'UNKNOWN', label: 'Random Voice', desc: 'Random voice selection' }
+        ].map(voice => (
+          <button
+            key={voice.id}
+            onClick={() => handleVoiceChange(voice.id)}
+            className={`block w-full text-left p-6 rounded-lg border transition-all ${
+              selectedVoice === voice.id
+                ? 'bg-custom-white/20 border-custom-white/60'
+                : 'bg-custom-white/10 border-custom-white/40 hover:bg-custom-white/20'
+            }`}
+          >
+            <P className="text-custom-white font-bold">{voice.label}</P>
+            <P className="text-custom-white/70 text-sm">{voice.desc}</P>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 const GazeDirectionTest = ({ currentGaze, loss }) => (
   <div className="bg-custom-white/10 backdrop-blur-md rounded-xl p-10 border border-custom-white/40 hover:border-custom-white/60 hover:bg-custom-white/20 transition-colors">
     <H3 className="text-custom-white text-2xl mb-6">Current Gaze Detection</H3>
@@ -136,9 +172,11 @@ export const EyeSettingsPage = () => {
 
       <div className="relative max-w-7xl mx-auto px-4 py-16">
         <div className="grid md:grid-cols-2 gap-16">
+          
           <div className="space-y-16">
             <GazeDirectionTest currentGaze={currentGaze} loss={loss} />
             <SensitivitySlider value={sensitivity} onChange={(e) => setSensitivity(e.target.value)} />
+            <VoiceSelector />
             <ModeSelector currentMode={currentMode} onModeChange={setCurrentMode} />
           </div>
           <div className="space-y-16">
