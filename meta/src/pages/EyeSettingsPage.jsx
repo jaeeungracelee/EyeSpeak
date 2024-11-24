@@ -1,32 +1,32 @@
-// src/pages/EyeSettingsPage.jsx
 import { useState, useEffect } from 'react';
-import { Eye, Settings, Volume2, AlertCircle, ArrowRight, BarChart2 } from 'lucide-react';
+import { Eye, ArrowRight } from 'lucide-react';
 import { FilmGrain } from '../components/FilmGrain';
+import { H1, H3, P } from '../components/Typography';
 
 const GazeDirectionTest = ({ currentGaze, loss }) => (
-  <div className="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/20">
-    <h3 className="text-white font-serif text-xl mb-4">Current Gaze Detection</h3>
-    <div className="grid grid-cols-2 gap-4">
-      <div className="flex items-center gap-2">
-        <div className="w-3 h-3 rounded-full bg-green-400" />
-        <span className="text-white">Gaze Type: {currentGaze}</span>
+  <div className="bg-custom-white/10 backdrop-blur-md rounded-xl p-10 border border-custom-white/40 hover:border-custom-white/60 hover:bg-custom-white/20 transition-colors">
+    <H3 className="text-custom-white text-2xl mb-6">Current Gaze Detection</H3>
+    <div className="grid grid-cols-2 gap-6">
+      <div className="flex items-center gap-4">
+        <div className="w-4 h-4 rounded-full bg-spring" />
+        <P className="text-custom-white">Gaze Type: {currentGaze}</P>
       </div>
-      <div className="flex items-center gap-2">
-        <div className={`w-3 h-3 rounded-full ${loss < 0.02 ? 'bg-green-400' : 'bg-yellow-400'}`} />
-        <span className="text-white">Loss: {loss.toFixed(3)}</span>
+      <div className="flex items-center gap-4">
+        <div className={`w-4 h-4 rounded-full ${loss < 0.02 ? 'bg-spring' : 'bg-yellow-400'}`} />
+        <P className="text-custom-white">Loss: {loss.toFixed(3)}</P>
       </div>
     </div>
   </div>
 );
 
 const GazeLog = ({ logs }) => (
-  <div className="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/20 h-64 overflow-auto">
-    <h3 className="text-white font-serif text-xl mb-4">Gaze Input Log</h3>
-    <div className="space-y-2">
+  <div className="bg-custom-white/10 backdrop-blur-md rounded-xl p-10 border border-custom-white/40 hover:border-custom-white/60 hover:bg-custom-white/20 transition-colors h-64 overflow-auto">
+    <H3 className="text-custom-white text-2xl mb-6">Gaze Input Log</H3>
+    <div className="space-y-4">
       {logs.map((log, i) => (
-        <div key={i} className="text-white/80 flex items-center gap-2">
-          <span className="text-xs opacity-50">{log.time}</span>
-          <span>{log.action}</span>
+        <div key={i} className="text-custom-white/80 flex items-center gap-4">
+          <span className="text-sm opacity-50">{log.time}</span>
+          <P>{log.action}</P>
         </div>
       ))}
     </div>
@@ -34,28 +34,28 @@ const GazeLog = ({ logs }) => (
 );
 
 const SensitivitySlider = ({ value, onChange }) => (
-  <div className="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/20">
-    <h3 className="text-white font-serif text-xl mb-4">Gaze Sensitivity</h3>
-    <input 
-      type="range" 
-      min="0.1" 
-      max="0.4" 
+  <div className="bg-custom-white/10 backdrop-blur-md rounded-xl p-10 border border-custom-white/40 hover:border-custom-white/60 hover:bg-custom-white/20 transition-colors">
+    <H3 className="text-custom-white text-2xl mb-6">Gaze Sensitivity</H3>
+    <input
+      type="range"
+      min="0.1"
+      max="0.4"
       step="0.05"
       value={value}
       onChange={onChange}
-      className="w-full h-2 bg-white/20 rounded-lg appearance-none cursor-pointer"
+      className="w-full h-2 bg-custom-white/20 rounded-lg appearance-none cursor-pointer"
     />
-    <div className="flex justify-between mt-2">
-      <span className="text-white/60">More Accurate</span>
-      <span className="text-white/60">More Sensitive</span>
+    <div className="flex justify-between mt-4 text-custom-white/70">
+      <span>More Accurate</span>
+      <span>More Sensitive</span>
     </div>
   </div>
 );
 
 const ModeSelector = ({ currentMode, onModeChange }) => (
-  <div className="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/20">
-    <h3 className="text-white font-serif text-xl mb-4">Text-entry Mode</h3>
-    <div className="space-y-2">
+  <div className="bg-custom-white/10 backdrop-blur-md rounded-xl p-10 border border-custom-white/40 hover:border-custom-white/60 hover:bg-custom-white/20 transition-colors">
+    <H3 className="text-custom-white text-2xl mb-6">Text-entry Mode</H3>
+    <div className="space-y-4">
       {[
         { id: 1, name: "Letter-by-letter keyboard", desc: "Type letters one by one with no prediction" },
         { id: 2, name: "Ambiguous keyboard only", desc: "Type with ambiguous keyboard without LLM" },
@@ -64,14 +64,14 @@ const ModeSelector = ({ currentMode, onModeChange }) => (
         <button
           key={mode.id}
           onClick={() => onModeChange(mode.id)}
-          className={`w-full text-left p-4 rounded-lg border transition-all ${
+          className={`block w-full text-left p-6 rounded-lg border transition-all ${
             currentMode === mode.id
-              ? 'bg-white/20 border-white/40'
-              : 'bg-white/5 border-white/10 hover:bg-white/10'
+              ? 'bg-custom-white/20 border-custom-white/60'
+              : 'bg-custom-white/10 border-custom-white/40 hover:bg-custom-white/20'
           }`}
         >
-          <div className="text-white font-medium">{mode.name}</div>
-          <div className="text-white/60 text-sm">{mode.desc}</div>
+          <P className="text-custom-white font-bold">{mode.name}</P>
+          <P className="text-custom-white/70 text-sm">{mode.desc}</P>
         </button>
       ))}
     </div>
@@ -79,21 +79,21 @@ const ModeSelector = ({ currentMode, onModeChange }) => (
 );
 
 const GestureGuide = () => (
-  <div className="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/20">
-    <h3 className="text-white font-serif text-xl mb-4">Gesture Guide</h3>
-    <div className="grid grid-cols-2 gap-4">
+  <div className="bg-custom-white/10 backdrop-blur-md rounded-xl p-10 border border-custom-white/40 hover:border-custom-white/60 hover:bg-custom-white/20 transition-colors">
+    <H3 className="text-custom-white text-2xl mb-6">Gesture Guide</H3>
+    <div className="grid grid-cols-2 gap-6">
       {[
         { direction: "Left-up", letter: "ABCDEF", word: "Word 1" },
         { direction: "Right-up", letter: "GHIJKLM", word: "Word 2" },
         { direction: "Left-down", letter: "NOPQRST", word: "Word 3" },
         { direction: "Right-down", letter: "UVWXYZ", word: "Next page" },
         { direction: "Closed", letter: "→ Word mode", word: "→ Letter mode" },
-        { direction: "Up", letter: "Delete", word: "Finish" },
+        { direction: "Up", letter: "Delete", word: "Finish" }
       ].map((gesture, i) => (
-        <div key={i} className="text-white/80 space-y-1">
-          <div className="font-medium">{gesture.direction}</div>
-          <div className="text-sm opacity-60">Letter: {gesture.letter}</div>
-          <div className="text-sm opacity-60">Word: {gesture.word}</div>
+        <div key={i} className="text-custom-white/80">
+          <P className="font-bold">{gesture.direction}</P>
+          <P className="text-sm opacity-70">Letter: {gesture.letter}</P>
+          <P className="text-sm opacity-70">Word: {gesture.word}</P>
         </div>
       ))}
     </div>
@@ -107,43 +107,44 @@ export const EyeSettingsPage = () => {
   const [loss, setLoss] = useState(0.015);
   const [logs, setLogs] = useState([
     { time: "10:45:23", action: "Looking Up" },
-    { time: "10:45:25", action: "Looking Left" },
-    // Add more sample logs
+    { time: "10:45:25", action: "Looking Left" }
   ]);
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-blue-200 via-purple-300 to-pink-200">
+    <div className="relative min-h-screen overflow-hidden">
+      {/* Enhanced gradient background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-berkeley via-lapis to-spring opacity-90" />
+
+      {/* Floating gradient orbs for depth */}
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-spring rounded-full mix-blend-multiply filter blur-3xl animate-blob opacity-50" />
+      <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-lapis rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-2000 opacity-50" />
+      <div className="absolute bottom-1/4 left-1/3 w-96 h-96 bg-berkeley rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-4000 opacity-50" />
+
       <FilmGrain />
-      
-      {/* Top Navigation */}
-      <nav className="relative bg-white/10 backdrop-blur-md border-b border-white/20">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+
+      <nav className="relative bg-custom-white/10 backdrop-blur-md border-b border-custom-white/40">
+        <div className="max-w-7xl mx-auto px-4 py-6 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Eye className="h-6 w-6 text-white" />
-            <h1 className="text-white font-serif text-xl">Eye Tracking Settings</h1>
+            <Eye className="h-8 w-8 text-custom-white" />
+            <H1 className="text-custom-white text-3xl">Eye Tracking Settings</H1>
           </div>
-          <button 
+          <button
             onClick={() => window.location.href = '/text-entry'}
-            className="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-lg border border-white/20 hover:bg-white/20 transition-all"
+            className="bg-custom-white/10 text-custom-white font-bold px-6 py-3 rounded-lg shadow-lg hover:bg-custom-white/20 hover:scale-105 transition-transform border border-custom-white/40 hover:border-custom-white/60"
           >
-            <span className="text-white">Start Text Entry</span>
-            <ArrowRight className="h-4 w-4 text-white" />
+            Start Text Entry
           </button>
         </div>
       </nav>
 
-      {/* Main Content */}
-      <div className="relative max-w-7xl mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Left Column */}
-          <div className="space-y-8">
+      <div className="relative max-w-7xl mx-auto px-4 py-16">
+        <div className="grid md:grid-cols-2 gap-16">
+          <div className="space-y-16">
             <GazeDirectionTest currentGaze={currentGaze} loss={loss} />
             <SensitivitySlider value={sensitivity} onChange={(e) => setSensitivity(e.target.value)} />
             <ModeSelector currentMode={currentMode} onModeChange={setCurrentMode} />
           </div>
-          
-          {/* Right Column */}
-          <div className="space-y-8">
+          <div className="space-y-16">
             <GestureGuide />
             <GazeLog logs={logs} />
           </div>
