@@ -25,8 +25,6 @@ export const TextInputPage = () => {
   const [activeRegion, setActiveRegion] = useState(null);
   const [curRegion, setCurRegion] = useState(null);
   const checkRegionGaze = (region) => {
-    console.log("region: " + region);
-    console.log("Current Gaze: " + currentGaze);
     return currentGaze === region;
   };
   const getGazeRegion = useCallback((x, y) => {
@@ -43,83 +41,6 @@ export const TextInputPage = () => {
 
     return "center";
   }, []);
-  // console.log("Current Gaze" + currentGaze);
-  // useEffect(() => {
-  //   const mouseMove = (e) => {
-  //     // console.log(e.clientX);
-  //     // console.log(e.clientY);
-  //     const region = getGazeRegion(e.clientX, e.clientY);
-  //     // console.log("cur region: " + curRegion);
-  //     // console.log("new region: " + region);
-  //     // console.log("cur gaze: " + currentGaze);
-  //     if (region != null) {
-  //       setCurRegion(region);
-  //       setCurrentGaze(region);
-  //     }
-  //     if (curRegion === "center") {
-  //       // setGazeStartTime(null);
-  //       // setActiveRegion(null);
-  //     } else if (!checkRegionGaze(region)) {
-  //       if (region != null && gazeStartTime === null) {
-  //         setGazeStartTime(Date.now());
-  //       }
-  //     } else if (gazeStartTime && !activeRegion) {
-  //       const gazeTime = Date.now() - gazeStartTime;
-  //       console.log("gazeTime: " + gazeTime);
-  //       if (gazeTime >= GAZE_THRESHOLD) {
-  //         setActiveRegion(curRegion);
-  //         const letters = GAZE_REGIONS[activeRegion].letters;
-  //         setInputText((prev) => prev + letters[0]);
-  //         setActiveRegion(null);
-  //         setGazeStartTime(null);
-  //       }
-  //     }
-  //     console.log(gazeStartTime);
-  //   };
-  //   window.addEventListener("mousemove", mouseMove);
-
-  //   return () => {
-  //     window.removeEventListener("mousemove", mouseMove);
-  //   };
-  // }, [currentGaze, gazeStartTime]);
-  useEffect(() => {
-    const mouseMove = (e) => {
-      // console.log(e.clientX);
-      // console.log(e.clientY);
-      const region = getGazeRegion(e.clientX, e.clientY);
-      // console.log("cur region: " + curRegion);
-      // console.log("new region: " + region);
-      // console.log("cur gaze: " + currentGaze);
-      if (region != null) {
-        setCurRegion(region);
-        setCurrentGaze(region);
-      }
-      if (curRegion === "center") {
-        // setGazeStartTime(null);
-        // setActiveRegion(null);
-      } else if (!checkRegionGaze(region)) {
-        if (region != null && gazeStartTime === null) {
-          setGazeStartTime(Date.now());
-        }
-      } else if (gazeStartTime && !activeRegion) {
-        const gazeTime = Date.now() - gazeStartTime;
-        console.log("gazeTime: " + gazeTime);
-        if (gazeTime >= GAZE_THRESHOLD) {
-          setActiveRegion(curRegion);
-          const letters = GAZE_REGIONS[activeRegion].letters;
-          setInputText((prev) => prev + letters[0]);
-          setActiveRegion(null);
-          setGazeStartTime(null);
-        }
-      }
-      console.log(gazeStartTime);
-    };
-    window.addEventListener("mousemove", mouseMove);
-
-    return () => {
-      window.removeEventListener("mousemove", mouseMove);
-    };
-  }, [currentGaze, gazeStartTime]);
   useEffect(() => {
     if (!isInitialized) {
       // If WebGazer isn't initialized, go back to setup
@@ -130,11 +51,6 @@ export const TextInputPage = () => {
     const gazeListener = (data) => {
       if (!data) return;
       const region = getGazeRegion(data.x, data.y);
-      // console.log(e.clientX);
-      // console.log(e.clientY);
-      // console.log("cur region: " + curRegion);
-      // console.log("new region: " + region);
-      // console.log("cur gaze: " + currentGaze);
       if (region != null) {
         setCurRegion(region);
         setCurrentGaze(region);
@@ -148,7 +64,6 @@ export const TextInputPage = () => {
         }
       } else if (gazeStartTime && !activeRegion) {
         const gazeTime = Date.now() - gazeStartTime;
-        console.log("gazeTime: " + gazeTime);
         if (gazeTime >= GAZE_THRESHOLD) {
           setActiveRegion(curRegion);
           const letters = GAZE_REGIONS[activeRegion].letters;
@@ -178,18 +93,14 @@ export const TextInputPage = () => {
       webgazer.clearGazeListener();
     };
   }, [isInitialized, navigate, positionVideo, currentGaze, gazeStartTime]);
-  // console.log("region: " + activeRegion);
+
   useEffect(() => {
-    // console.log(GAZE_REGIONS);
     if (!activeRegion || !GAZE_REGIONS[activeRegion]) return;
 
     const letters = GAZE_REGIONS[activeRegion].letters;
     setInputText((prev) => prev + letters[0]);
     setActiveRegion(null);
-    // setTimeout(() => {
-    //   setActiveRegion(null);
     setGazeStartTime(null);
-    // }, 500);
   }, [activeRegion]);
 
   return (
