@@ -1,8 +1,15 @@
 import { Eye } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { FilmGrain } from '../components/FilmGrain';
+import { useEffect, useState } from 'react';
 
 export const LandingPage = () => {
+  const [setupComplete, setSetupComplete] = useState(false);
+
+  useEffect(() => {
+    const isSetupComplete = localStorage.getItem('setupComplete') === 'true';
+    setSetupComplete(isSetupComplete);
+  }, []);
   return (
     <div className="relative min-h-screen overflow-hidden">
       {/* Enhanced gradient background */}
@@ -29,11 +36,11 @@ export const LandingPage = () => {
             Communicate effortlessly through the power of eye tracking. Type and express yourself just by looking at the screen.
           </p>
           <Link 
-            to="/setup"
-            className="inline-block bg-white/10 backdrop-blur-md text-white font-semibold px-8 py-4 rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200 hover:scale-105 border border-white/20 hover:border-white/30 hover:bg-white/20"
-          >
-            Get Started
-          </Link>
+        to={setupComplete ? "/text" : "/setup"}
+        className="inline-block bg-white/10 backdrop-blur-md text-white font-semibold px-8 py-4 rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200 hover:scale-105 border border-white/20 hover:border-white/30 hover:bg-white/20"
+      >
+        {setupComplete ? "Continue to Text Input" : "Get Started"}
+      </Link>
         </header>
 
         <div className="grid md:grid-cols-3 gap-8 mb-16">

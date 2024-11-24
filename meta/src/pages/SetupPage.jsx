@@ -32,16 +32,21 @@ export const SetupPage = () => {
         const success = await initializeWebGazer();
         if (success) {
           setWebgazerInitialized(true);
+          window.webgazer.showVideo(true); // Show the video feed
           positionVideo();
         }
-
-        setWebgazerInitialized(true);
       }
     };
 
     init();
-  }, [currentStep, initializeWebGazer, positionVideo]);
 
+    // Hide the video feed when the component unmounts
+    return () => {
+      if (window.webgazer) {
+        window.webgazer.showVideo(false);
+      }
+    };
+  }, [currentStep, initializeWebGazer, positionVideo]);
   const handleCalibrationClick = (e) => {
     if (
       !webgazerInitialized ||
@@ -75,6 +80,9 @@ export const SetupPage = () => {
 
   const handleComplete = () => {
     // webgazer.saveData(); // Save calibration data
+    // Mark setup as complete
+    localStorage.setItem('setupComplete', 'true');
+
     navigate("/text"); // Use navigate instead of window.location
   };
 

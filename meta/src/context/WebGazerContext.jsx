@@ -9,10 +9,15 @@ export const WebGazerProvider = ({ children }) => {
   const initializeWebGazer = async () => {
     if (!isInitialized) {
       try {
-        await webgazer.setRegression("ridge").setTracker("TFFacemesh").begin();
+        await window.webgazer
+          .setRegression("ridge")
+          .setTracker("TFFacemesh")
+          .begin();
 
-        // Set default configurations
-        window.webgazer.showVideo(true);
+        // Remove the line that shows the video
+        // window.webgazer.showVideo(true);
+
+        // Keep other configurations
         window.webgazer.showFaceOverlay(true);
         window.webgazer.showPredictionPoints(true);
 

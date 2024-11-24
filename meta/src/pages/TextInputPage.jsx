@@ -16,7 +16,7 @@ const GAZE_REGIONS = {
 };
 
 export const TextInputPage = () => {
-  const { isInitialized, positionVideo } = useWebGazer();
+  const { isInitialized, positionVideo, initializeWebGazer } = useWebGazer();
   const navigate = useNavigate();
   const [inputText, setInputText] = useState("");
   const [llmSuggestion, setLlmSuggestion] = useState("");
@@ -43,6 +43,34 @@ export const TextInputPage = () => {
 
     return "center";
   }, []);
+
+  useEffect(() => {
+    const isSetupComplete = localStorage.getItem('setupComplete') === 'true';
+    if (!isSetupComplete) {
+      navigate("/");
+      return;
+    }
+
+    const init = async () => {
+      if (!isInitialized) {
+        await initializeWebGazer();
+      }
+      // Hide the video feed
+      if (window.webgazer) {
+        window.webgazer.showVideo(false);
+      }
+      // ...existing code...
+    };
+
+    init();
+
+    // Cleanup to ensure the video feed remains hidden
+    return () => {
+      if (window.webgazer) {
+        window.webgazer.showVideo(false);
+      }
+    };
+  }, [isInitialized, initializeWebGazer, navigate]);
   // console.log("Current Gaze" + currentGaze);
   // useEffect(() => {
   //   const mouseMove = (e) => {
@@ -121,11 +149,6 @@ export const TextInputPage = () => {
     };
   }, [currentGaze, gazeStartTime]);
   useEffect(() => {
-    if (!isInitialized) {
-      // If WebGazer isn't initialized, go back to setup
-      navigate("/");
-      return;
-    }
 
     const gazeListener = (data) => {
       if (!data) return;
@@ -178,6 +201,8 @@ export const TextInputPage = () => {
       webgazer.clearGazeListener();
     };
   }, [isInitialized, navigate, positionVideo, currentGaze, gazeStartTime]);
+
+  
   // console.log("region: " + activeRegion);
   useEffect(() => {
     // console.log(GAZE_REGIONS);
