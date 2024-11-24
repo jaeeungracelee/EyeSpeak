@@ -1,25 +1,17 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+// src/pages/TextInputPage.jsx
+import { useState, useEffect, useCallback } from "react";
 import { Eye, RefreshCcw } from "lucide-react";
 import { useWebGazer } from "../context/WebGazerContext";
 import { useNavigate } from "react-router-dom";
 import { H3, P } from '../components/Typography';
 
 const GAZE_THRESHOLD = 1000; // 1 second
-const EYE_CLOSED_THRESHOLD = 2000; // 1.5 seconds
+const EYE_CLOSED_THRESHOLD = 1500; // 1.5 seconds
 const GAZE_REGIONS = {
   "left-up": { letters: "A-F", label: "A-F" },
   "right-up": { letters: "G-M", label: "G-M" },
   "left-down": { letters: "N-T", label: "N-T" },
   "right-down": { letters: "U-Z", label: "U-Z" },
-};
-
-// Debounce function to limit API calls
-const debounce = (func, wait) => {
-  let timeout;
-  return (...args) => {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => func(...args), wait);
-  };
 };
 
 const TextInputPage = () => {
@@ -36,20 +28,32 @@ const TextInputPage = () => {
   const [eyeClosedStartTime, setEyeClosedStartTime] = useState(null);
   const [eyesClosed, setEyesClosed] = useState(false);
 
+  const modes = ["character", "word", "sentence"];
 
-  const modes = useMemo(() => ["character", "word", "sentence"], []);
-  const currentMode = useMemo(() => modes[modeIndex % modes.length], [modes, modeIndex]);
-
-  // Memoize the getGazeRegion function
   const getGazeRegion = useCallback((x, y) => {
     const screenWidth = window.innerWidth;
     const screenHeight = window.innerHeight;
 
-    // Use early returns for better performance
-    if (y < screenHeight * 0.2 && x > screenWidth * 0.4 && x < screenWidth * 0.6) return "clear";
-    if (y > screenHeight * 0.8 && x > screenWidth * 0.4 && x < screenWidth * 0.6) return "delete";
-    if (y < screenHeight * 0.4) return x < screenWidth * 0.4 ? "left-up" : x > screenWidth * 0.6 ? "right-up" : "center";
-    if (y > screenHeight * 0.6) return x < screenWidth * 0.4 ? "left-down" : x > screenWidth * 0.6 ? "right-down" : "center";
+    if (
+      y < screenHeight * 0.2 &&
+      x > screenWidth * 0.4 &&
+      x < screenWidth * 0.6
+    ) {
+      return "clear";
+    } else if (
+      y > screenHeight * 0.8 &&
+      x > screenWidth * 0.4 &&
+      x < screenWidth * 0.6
+    ) {
+      return "delete";
+    } else if (y < screenHeight * 0.4) {
+      if (x < screenWidth * 0.4) return "left-up";
+      if (x > screenWidth * 0.6) return "right-up";
+    } else if (y > screenHeight * 0.6) {
+      if (x < screenWidth * 0.4) return "left-down";
+      if (x > screenWidth * 0.6) return "right-down";
+    }
+
     return "center";
   }, []);
 
@@ -66,47 +70,48 @@ const TextInputPage = () => {
     const sentence =
       sentenceOptions[index] || "No prediction available";
 
-  // Memoize predictions for each region
-  const getPredictionForRegion = useCallback((region) => {
-    const letterRange = GAZE_REGIONS[region]?.label;
-    const word = wordOptions[Object.keys(GAZE_REGIONS).indexOf(region)]?.prompt || "No prediction";
-    const sentence = sentenceOptions[Object.keys(GAZE_REGIONS).indexOf(region)] || "No prediction";
+    const modeOrder = [
+      modes[modeIndex % modes.length],
+      modes[(modeIndex + 1) % modes.length],
+      modes[(modeIndex + 2) % modes.length],
+    ];
 
-    switch (currentMode) {
-      case "character": return [letterRange, word, sentence];
-      case "word": return [word, sentence, letterRange];
-      case "sentence": return [sentence, letterRange, word];
-      default: return [letterRange, word, sentence];
+    if (modeOrder[0] === "character") {
+      return [letterRange, word, sentence];
+    } else if (modeOrder[0] === "word") {
+      return [word, sentence, letterRange];
+    } else if (modeOrder[0] === "sentence") {
+      return [sentence, letterRange, word];
     }
-  }, [currentMode, wordOptions, sentenceOptions]);
+  };
 
+  const fetchPredictions = async (letterRanges) => {
+    try {
+      const response = await fetch(
+        "https://deyelog.jasoncameron.dev/api/predict",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            letter_ranges: letterRanges.join(" "),
+            context: "What do you want to eat?",
+          }),
+        }
+      );
 
-  // Debounced fetch predictions
-  const debouncedFetchPredictions = () => {
-  }
-  // const debouncedFetchPredictions = useCallback(
-  //   debounce(async (letterRanges) => {
-  //     try {
-  //       const response = await fetch("https://deyelog.jasoncameron.dev/api/predict", {
-  //         method: "POST",
-  //         headers: { "Content-Type": "application/json" },
-  //         body: JSON.stringify({
-  //           letter_ranges: letterRanges.join(" "),
-  //           context: "What do you want to eat?",
-  //         }),
-  //       });
+      if (!response.ok) {
+        throw new Error("Failed to fetch predictions");
+      }
 
-  //       if (!response.ok) throw new Error("Failed to fetch predictions");
-        
-  //       const data = await response.json();
-  //       setWordOptions(data.prompt_options || []);
-  //       setSentenceOptions(data.sentences || []);
-  //     } catch (error) {
-  //       console.error("Error fetching predictions:", error);
-  //     }
-  //   }, 500),
-  //   []
-  // );
+      const data = await response.json();
+      setWordOptions(data.prompt_options || []);
+      setSentenceOptions(data.sentences || []);
+    } catch (error) {
+      console.error("Error fetching predictions:", error);
+    }
+  };
 
   useEffect(() => {
     const isSetupComplete = localStorage.getItem("setupComplete") === "true";
@@ -119,10 +124,14 @@ const TextInputPage = () => {
       if (!isInitialized) {
         await initializeWebGazer();
       }
+      // Hide the video feed
+      if (window.webgazer) {
+        window.webgazer.showVideo(false);
+      }
     };
 
     init();
-    window.webgazer.showVideo(false);
+
     // Cleanup to ensure the video feed remains hidden
     return () => {
       if (window.webgazer) {
@@ -160,6 +169,8 @@ const TextInputPage = () => {
     currentGaze,
     gazeStartTime,
     activeRegion,
+    eyeClosedStartTime,
+    eyesClosed,
     modes.length,
   ]);
 
@@ -195,27 +206,6 @@ const TextInputPage = () => {
 
     setActiveRegion(null);
     setGazeStartTime(null);
-    if (activeRegion) {
-      if (currentMode === "character") {
-        if (GAZE_REGIONS[activeRegion]) {
-          const label = GAZE_REGIONS[activeRegion].label;
-          setInputText((prev) => prev + label + " ");
-          const selectedRanges = inputText
-            .trim()
-            .split(" ")
-            .concat(label.trim());
-            debouncedFetchPredictions(selectedRanges);
-        }
-      } else if (currentMode === "word") {
-        const index = Object.keys(GAZE_REGIONS).indexOf(activeRegion);
-        const word = wordOptions[index]?.prompt || "";
-        setInputText((prev) => prev + word + " ");
-      } else if (currentMode === "sentence") {
-        const index = Object.keys(GAZE_REGIONS).indexOf(activeRegion);
-        const sentence = sentenceOptions[index] || "";
-        setInputText((prev) => prev + sentence + " ");
-      }
-    }
   }, [activeRegion, modeIndex, inputText, modes]);
 
   // Initialize predictions when the component mounts
@@ -223,13 +213,15 @@ const TextInputPage = () => {
     const initialRanges = Object.values(GAZE_REGIONS).map(
       (region) => region.label
     );
-    debouncedFetchPredictions(initialRanges);
+    fetchPredictions(initialRanges);
   }, []);
 
   return (
     <div className="relative min-h-screen overflow-hidden">
-      {/* Enhanced gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-berkeley via-lapis to-spring opacity-90" />
+      {/* Background elements */}
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-200 via-purple-300 to-pink-200 opacity-70" />
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-400 rounded-full mix-blend-multiply filter blur-3xl animate-blob opacity-30" />
+      <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-pink-400 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-2000 opacity-30" />
 
       {/* Letter regions */}
       <div className="relative w-full h-screen grid grid-cols-3 grid-rows-3 gap-8 p-8">
@@ -238,8 +230,8 @@ const TextInputPage = () => {
           className={`relative rounded-xl border backdrop-blur-md transition-all duration-300 flex flex-col items-center justify-center w-full h-64
               ${
                 currentGaze === "left-up"
-                  ? "bg-custom-white/30 border-custom-white/40 shadow-lg scale-105"
-                  : "bg-custom-white/10 border-custom-white/20 hover:bg-custom-white/20"
+                  ? "bg-white/30 border-white/40 shadow-lg scale-105"
+                  : "bg-white/10 border-white/20 hover:bg-white/20 scale-100"
               }
               mt-16`}
         >
@@ -247,13 +239,13 @@ const TextInputPage = () => {
             const predictions = getPredictionForRegion("left-up");
             return (
               <>
-                <div className="font-serif text-5xl text-custom-white mb-2">
+                <div className="font-serif text-5xl text-white mb-2">
                   {predictions[0]}
                 </div>
-                <div className="font-serif text-3xl text-gray-200">
+                <div className="font-serif text-3xl text-gray-400">
                   {predictions[1]}
                 </div>
-                <div className="font-serif text-2xl text-gray-400">
+                <div className="font-serif text-2xl text-gray-600">
                   {predictions[2]}
                 </div>
               </>
@@ -265,8 +257,8 @@ const TextInputPage = () => {
           className={`relative rounded-xl border backdrop-blur-md transition-all duration-300 flex flex-col items-center justify-center w-full h-64
               ${
                 currentGaze === "right-up"
-                  ? "bg-custom-white/30 border-custom-white/40 shadow-lg scale-105"
-                  : "bg-custom-white/10 border-custom-white/20 hover:bg-custom-white/20"
+                  ? "bg-white/30 border-white/40 shadow-lg scale-105"
+                  : "bg-white/10 border-white/20 hover:bg-white/20 scale-100"
               }
               mt-16`}
         >
@@ -274,13 +266,13 @@ const TextInputPage = () => {
             const predictions = getPredictionForRegion("right-up");
             return (
               <>
-                <div className="font-serif text-5xl text-custom-white mb-2">
+                <div className="font-serif text-5xl text-white mb-2">
                   {predictions[0]}
                 </div>
-                <div className="font-serif text-3xl text-gray-200">
+                <div className="font-serif text-3xl text-gray-400">
                   {predictions[1]}
                 </div>
-                <div className="font-serif text-2xl text-gray-400">
+                <div className="font-serif text-2xl text-gray-600">
                   {predictions[2]}
                 </div>
               </>
@@ -292,26 +284,26 @@ const TextInputPage = () => {
         <div></div>
         <div className="space-y-8">
           {/* Input field */}
-          <div className="bg-custom-white/10 backdrop-blur-md rounded-xl p-8 border border-custom-white/20">
-            <H3 className="text-custom-white mb-4">Text:</H3>
-            <P className="text-custom-white text-xl min-h-[3rem] font-mono">
+          <div className="bg-white/10 backdrop-blur-md rounded-xl p-8 border border-white/20">
+            <h3 className="font-serif text-2xl text-white mb-4">Text:</h3>
+            <div className="text-white text-xl min-h-[3rem] font-mono">
               {inputText || "|"}
-            </P>
+            </div>
           </div>
 
           {/* LLM suggestions */}
-          <div className="bg-custom-white/10 backdrop-blur-md rounded-xl p-8 border border-custom-white/20">
-            <H3 className="text-custom-white mb-4">LLM Suggestion:</H3>
-            <P className="text-custom-white/90 text-xl min-h-[3rem]">
+          <div className="bg-white/10 backdrop-blur-md rounded-xl p-8 border border-white/20">
+            <h3 className="font-serif text-2xl text-white mb-4">LLM:</h3>
+            <div className="text-white/80 text-xl min-h-[3rem]">
               {llmSuggestion || "Waiting for input..."}
-            </P>
+            </div>
           </div>
 
           {/* Control buttons */}
           <div className="flex justify-center gap-8">
             <button
               onClick={() => setInputText("")}
-              className="bg-custom-white/10 backdrop-blur-md text-custom-white px-8 py-4 rounded-lg border border-custom-white/20 hover:bg-custom-white/20 transition-all duration-200 flex items-center gap-4"
+              className="bg-white/10 backdrop-blur-md text-white px-8 py-4 rounded-lg border border-white/20 hover:bg-white/20 transition-all duration-200 flex items-center gap-4"
             >
               <RefreshCcw className="w-6 h-6" />
               Clear
@@ -319,10 +311,10 @@ const TextInputPage = () => {
           </div>
 
           {/* Instructions */}
-          <div className="text-center text-custom-white/60 text-lg">
+          <div className="text-center text-white/60 text-lg">
             Close your eyes for 1.5 seconds to switch modes
           </div>
-          <div className="text-center text-custom-white/80 text-lg">
+          <div className="text-center text-white/80 text-lg">
             Current Mode: {modes[modeIndex % modes.length].toUpperCase()}
           </div>
         </div>
@@ -333,8 +325,8 @@ const TextInputPage = () => {
           className={`relative rounded-xl border backdrop-blur-md transition-all duration-300 flex flex-col items-center justify-center w-full h-64
               ${
                 currentGaze === "left-down"
-                  ? "bg-custom-white/30 border-custom-white/40 shadow-lg scale-105"
-                  : "bg-custom-white/10 border-custom-white/20 hover:bg-custom-white/20"
+                  ? "bg-white/30 border-white/40 shadow-lg scale-105"
+                  : "bg-white/10 border-white/20 hover:bg-white/20 scale-100"
               }
               mb-16`}
         >
@@ -342,13 +334,13 @@ const TextInputPage = () => {
             const predictions = getPredictionForRegion("left-down");
             return (
               <>
-                <div className="font-serif text-5xl text-custom-white mb-2">
+                <div className="font-serif text-5xl text-white mb-2">
                   {predictions[0]}
                 </div>
-                <div className="font-serif text-3xl text-gray-200">
+                <div className="font-serif text-3xl text-gray-400">
                   {predictions[1]}
                 </div>
-                <div className="font-serif text-2xl text-gray-400">
+                <div className="font-serif text-2xl text-gray-600">
                   {predictions[2]}
                 </div>
               </>
@@ -360,8 +352,8 @@ const TextInputPage = () => {
           className={`relative rounded-xl border backdrop-blur-md transition-all duration-300 flex flex-col items-center justify-center w-full h-64
               ${
                 currentGaze === "right-down"
-                  ? "bg-custom-white/30 border-custom-white/40 shadow-lg scale-105"
-                  : "bg-custom-white/10 border-custom-white/20 hover:bg-custom-white/20"
+                  ? "bg-white/30 border-white/40 shadow-lg scale-105"
+                  : "bg-white/10 border-white/20 hover:bg-white/20 scale-100"
               }
               mb-16`}
         >
@@ -369,13 +361,13 @@ const TextInputPage = () => {
             const predictions = getPredictionForRegion("right-down");
             return (
               <>
-                <div className="font-serif text-5xl text-custom-white mb-2">
+                <div className="font-serif text-5xl text-white mb-2">
                   {predictions[0]}
                 </div>
-                <div className="font-serif text-3xl text-gray-200">
+                <div className="font-serif text-3xl text-gray-400">
                   {predictions[1]}
                 </div>
-                <div className="font-serif text-2xl text-gray-400">
+                <div className="font-serif text-2xl text-gray-600">
                   {predictions[2]}
                 </div>
               </>

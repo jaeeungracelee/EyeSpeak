@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unescaped-entities */
 // src/pages/SetupPage.jsx
 import { useWebGazer } from "../context/WebGazerContext";
 import { useNavigate } from "react-router-dom";
